@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "canoe-schema"
+version = "1.0.0"
+description = "Versioned database schema and typed Python models for CANOE"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+sqlmodel = ["sqlmodel>=0.0.18"]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov",
+    "ruff",
+    "mypy",
+]
+
+[project.urls]
+Repository = "https://github.com/CANOE-main/canoe-schema"
+Changelog = "https://github.com/CANOE-main/canoe-schema/blob/main/CHANGELOG.md"
+
+[tool.hatch.version]
+path = "canoe_schema/__init__.py"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.mypy]
+python_version = "3.11"
+plugins = ["pydantic.mypy"]
+strict = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
