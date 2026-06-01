@@ -12,18 +12,15 @@ for schema identification and database migration.
 │   ├── v3_1/
 │   │   ├── enums.py
 │   │   └── models.py               
-│   └── v3_2/
-│       ├── enums.py
-│       └── models.py
-├── schema/
-│   ├── v3_1/
-│   │   ├── schema_3_1.sql          # Schema DDL
+│   │   ├── schema.sql              # Schema DDL
 │   │   └── migrations/
 │   │       └── to_v3_2/
 │   │           ├── migrate.py      # Migration orchestrator (CLI)
 │   │           ├── migrate.sql     # Raw SQL executed by migrate.py
 │   │           └── README.md       # Migration-specific notes
 │   └── v3_2/
+│       ├── enums.py
+│       ├── models.py
 │       └── schema_3_2.sql
 └── tools/
     └── match_schema.py             # Identify the schema version of a database
@@ -84,7 +81,7 @@ source database is never left in a partial state.
 **Usage:**
 
 ```bash
-python schema/v3_1/migrations/to_v3_2/migrate.py path/to/database.db
+python canoe_schema/v3_1/migrations/to_v3_2/migrate.py path/to/database.db
 ```
 
 **Options:**
@@ -101,13 +98,13 @@ python schema/v3_1/migrations/to_v3_2/migrate.py path/to/database.db
 
 ```bash
 # Default: abort on duplicate technologies
-python schema/v3_1/migrations/to_v3_2/migrate.py my_model.db
+python canoe_schema/v3_1/migrations/to_v3_2/migrate.py my_model.db
 
 # Automatically resolve duplicates by keeping the most-referenced entry
-python schema/v3_1/migrations/to_v3_2/migrate.py my_model.db --duplicate-tech fix
+python canoe_schema/v3_1/migrations/to_v3_2/migrate.py my_model.db --duplicate-tech fix
 
 # Preview what the migration would do without touching the database
-python schema/v3_1/migrations/to_v3_2/migrate.py my_model.db --dry-run --verbose
+python canoe_schema/v3_1/migrations/to_v3_2/migrate.py my_model.db --dry-run --verbose
 ```
 
 **Backup:**
