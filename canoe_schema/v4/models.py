@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
+
+from ..base import CanoeBaseModel
 
 from .enums import (
     CommodityTypeCode,
@@ -15,10 +17,6 @@ from .enums import (
     DataQualityTechnologyLevel,
     DataQualityTimeLevel,
 )
-
-
-class CanoeBaseModel(BaseModel):
-    model_config = ConfigDict(extra="forbid")
 
 
 class MetaData(CanoeBaseModel):
