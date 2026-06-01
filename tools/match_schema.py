@@ -218,7 +218,7 @@ def main() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     signatures = [
         parse_sql_signature(repo_root / 'schema' / 'v3_1' / 'schema_3_1.sql', '3.1'),
-        parse_sql_signature(repo_root / 'schema' / 'v3_2' / 'canoe_schema.sql', '3.2'),
+        parse_sql_signature(repo_root / 'schema' / 'v3_2' / 'schema_3_2.sql', '3.2'),
     ]
 
     result = classify(args.sqlite_db, signatures)
