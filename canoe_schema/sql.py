@@ -20,8 +20,8 @@ def get_sql_schema(version: str) -> str:
     """
     try:
         # For Python 3.9+
-        schema_dir = resources.files("canoe_schema").parent / "schema" / f"v{version}"
-        schema_file = schema_dir / f"schema_{version}.sql"
+        schema_dir = resources.files("canoe_schema").parent / "schema" / f"v{version.replace('.', '_')}"
+        schema_file = schema_dir / f"schema_{version.replace('.', '_')}.sql"
         return schema_file.read_text(encoding="utf-8")
     except (AttributeError, FileNotFoundError) as e:
         raise FileNotFoundError(f"Schema v{version} not found") from e
