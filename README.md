@@ -42,6 +42,7 @@ python tools/match_schema.py path/to/database.db
 | Flag | Description |
 |---|---|
 | `--format json` | Output results as JSON instead of human-readable text |
+| `--diff` | Whether to show specific table-level differences between database and schema (only on text format) |
 
 **Example output:**
 
