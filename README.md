@@ -8,18 +8,23 @@ for schema identification and database migration.
 
 ```
 .
+├── canoe_schema/                   # Pydantic models (in sync with DDL)
+│   ├── v3_1/
+│   │   ├── enums.py
+│   │   └── models.py               
+│   └── v3_2/
+│       ├── enums.py
+│       └── models.py
 ├── schema/
 │   ├── v3_1/
 │   │   ├── schema_3_1.sql          # Schema DDL
-│   │   ├── models.py               # Pydantic models (in sync with DDL)
 │   │   └── migrations/
 │   │       └── to_v3_2/
 │   │           ├── migrate.py      # Migration orchestrator (CLI)
 │   │           ├── migrate.sql     # Raw SQL executed by migrate.py
 │   │           └── README.md       # Migration-specific notes
 │   └── v3_2/
-│       ├── canoe_schema.sql
-│       └── models.py
+│       └── schema_3_2.sql
 └── tools/
     └── match_schema.py             # Identify the schema version of a database
 ```
