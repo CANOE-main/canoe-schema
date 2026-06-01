@@ -63,6 +63,7 @@ the entire migration in a single transaction — rolling back on any error so th
 source database is never left in a partial state.
 
 #### v3.1 → v3.2
+> Most recent only, see `schema/version/migrations` for additional migrations
 
 **What changes:**
 

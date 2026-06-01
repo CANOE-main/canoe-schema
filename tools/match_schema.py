@@ -163,6 +163,46 @@ def score_match(
     return score, len(common), len(exp_table_names), len(db_table_names)
 
 
+def diff_tables(
+    db_tables: dict[str, tuple[str, ...]],
+    expected_tables: dict[str, tuple[str, ...]],
+) -> dict:
+    """
+    Produce a structured diff between the database's actual tables and the
+    expected tables from a schema signature.
+
+    Returns a dict with three keys:
+      - missing_in_db:   tables present in the schema but absent from the DB.
+      - extra_in_db:     tables present in the DB but not in the schema.
+      - column_mismatches: tables present in both but with column differences,
+                           each entry listing columns missing in the DB and
+                           columns extra in the DB relative to the schema.
+    """
+    db_names = set(db_tables.keys())
+    exp_names = set(expected_tables.keys())
+
+    missing_in_db = sorted(exp_names - db_names)
+    extra_in_db = sorted(db_names - exp_names)
+
+    column_mismatches: dict[str, dict[str, list[str]]] = {}
+    for table in sorted(db_names & exp_names):
+        db_cols = set(db_tables[table])
+        exp_cols = set(expected_tables[table])
+        missing_cols = sorted(exp_cols - db_cols)
+        extra_cols = sorted(db_cols - exp_cols)
+        if missing_cols or extra_cols:
+            column_mismatches[table] = {
+                'missing_in_db': missing_cols,
+                'extra_in_db': extra_cols,
+            }
+
+    return {
+        'missing_in_db': missing_in_db,
+        'extra_in_db': extra_in_db,
+        'column_mismatches': column_mismatches,
+    }
+
+
 def classify(db_path: Path, signatures: list[SchemaSignature]) -> dict:
     db_tables = read_sqlite_signature(db_path)
     metadata_version = read_metadata_version(db_path)
@@ -184,6 +224,7 @@ def classify(db_path: Path, signatures: list[SchemaSignature]) -> dict:
                 'expected_tables': expected_total,
                 'db_tables': db_total,
                 'exact': db_tables == sig.tables,
+                'diff': diff_tables(db_tables, sig.tables),
             }
         )
 
@@ -202,6 +243,35 @@ def classify(db_path: Path, signatures: list[SchemaSignature]) -> dict:
     }
 
 
+def _print_diff(diff: dict, indent: str = '  ') -> None:
+    missing_tables = diff['missing_in_db']
+    extra_tables = diff['extra_in_db']
+    col_mismatches = diff['column_mismatches']
+
+    if not missing_tables and not extra_tables and not col_mismatches:
+        print(f'{indent}No differences.')
+        return
+
+    if missing_tables:
+        print(f'{indent}Tables missing in DB ({len(missing_tables)}):')
+        for t in missing_tables:
+            print(f'{indent}  - {t}')
+
+    if extra_tables:
+        print(f'{indent}Tables extra in DB ({len(extra_tables)}):')
+        for t in extra_tables:
+            print(f'{indent}  + {t}')
+
+    if col_mismatches:
+        print(f'{indent}Column mismatches ({len(col_mismatches)} table(s)):')
+        for table, cols in col_mismatches.items():
+            print(f'{indent}  {table}:')
+            for c in cols['missing_in_db']:
+                print(f'{indent}    - {c}  (missing in DB)')
+            for c in cols['extra_in_db']:
+                print(f'{indent}    + {c}  (extra in DB)')
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description='Match a SQLite database against known CANOE schema versions.'
@@ -212,6 +282,11 @@ def main() -> None:
         choices=['json', 'text'],
         default='text',
         help='Output format',
+    )
+    parser.add_argument(
+        '--diff',
+        action='store_true',
+        help='Show detailed table/column diff for each candidate (text format only).',
     )
     args = parser.parse_args()
 
@@ -245,6 +320,21 @@ def main() -> None:
             f"Best candidate: {best['version']} (score={best['score']}, "
             f"tables {best['common_tables']}/{best['expected_tables']})"
         )
+        if not args.diff:
+            # Always show the diff for the best match unless --diff is requested
+            # (in which case we show all candidates below).
+            print(f"Diff against best candidate ({best['version']}):")
+            _print_diff(best['diff'])
+
+    if args.diff:
+        print()
+        for candidate in result['candidates']:
+            print(
+                f"Diff against {candidate['version']} "
+                f"(score={candidate['score']}):"
+            )
+            _print_diff(candidate['diff'])
+            print()
 
     print('Recommendation: ' + result['recommendation'])
 
