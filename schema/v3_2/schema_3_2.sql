@@ -1571,12 +1571,6 @@ CREATE TABLE IF NOT EXISTS TechGroupMember
     FOREIGN KEY (group_name, data_id) REFERENCES TechGroup (group_name, data_id),
     PRIMARY KEY (group_name, tech, data_id)
 );
-CREATE TABLE IF NOT EXISTS SeasonLabel
-(
-    tech TEXT
-        PRIMARY KEY,
-    notes  TEXT
-);
 CREATE TABLE IF NOT EXISTS TechnologyLabel
 (
     tech TEXT
