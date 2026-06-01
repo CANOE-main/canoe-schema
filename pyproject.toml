@@ -31,7 +31,7 @@ path = "canoe_schema/__init__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["canoe_schema"]
-include = ["schema/"]
+artifacts = ["schema/**/*.sql"]
 
 [tool.ruff]
 target-version = "py311"
