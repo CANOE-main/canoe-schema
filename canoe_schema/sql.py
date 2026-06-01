@@ -31,4 +31,4 @@ def get_sql_schema_path(version: str) -> Path:
     """Get the filesystem path to a schema file."""
     import canoe_schema
     base_path = Path(canoe_schema.__file__).parent.parent
-    return base_path / "schema" / f"v{version}" / f"schema_{version}.sql"
+    return base_path / "schema" / f"v{version.replace('.', '_')}" / f"schema_{version.replace('.', '_')}.sql"
