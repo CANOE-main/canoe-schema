@@ -201,3 +201,43 @@ class CanoeBaseModel(BaseModel):
             f"INSERT INTO {table_sql} ({col_sql}) VALUES ({value_sql}) "
             f"ON CONFLICT ({conflict_sql}) {conflict_action};"
         )
+
+    def bulk_replace_into_sql(
+        rows: Sequence[CanoeBaseModel],
+        *,
+        include_nulls: bool = False,
+        include_defaults: bool = True,
+    ) -> tuple[str, list[tuple[Any, ...]]]:
+        """Build a REPLACE INTO ... SQL and parameter tuples for a batch of rows."""
+        if not rows:
+            raise ValueError("rows must not be empty")
+
+        row_type = type(rows[0])
+        if not all(type(row) is row_type for row in rows):
+            raise TypeError(
+                f"All rows must be the same type, got: "
+                f"{', '.join(sorted({type(r).__name__ for r in rows}))}"
+            )
+
+        # Use the first row to build the SQL template
+        first = rows[0]
+        payload = first._dump_for_sql(
+            include_nulls=include_nulls,
+            include_defaults=include_defaults,
+        )
+        columns = list(payload.keys())
+        table_sql = first._quote_identifier(first.table_name())
+        col_sql = ", ".join(first._quote_identifier(col) for col in columns)
+        placeholders = ", ".join("?" for _ in columns)
+
+        sql = f"REPLACE INTO {table_sql} ({col_sql}) VALUES ({placeholders});"
+
+        params = []
+        for row in rows:
+            row_payload = row._dump_for_sql(
+                include_nulls=include_nulls,
+                include_defaults=include_defaults,
+            )
+            params.append(tuple(row._coerce_sql_value(row_payload[col]) for col in columns))
+
+        return sql, params
