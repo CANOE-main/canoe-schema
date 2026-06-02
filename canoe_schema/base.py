@@ -241,3 +241,68 @@ class CanoeBaseModel(BaseModel):
             params.append(tuple(row._coerce_sql_value(row_payload[col]) for col in columns))
 
         return sql, params
+    
+    def to_insert_or_ignore_sql(
+        self,
+        *,
+        include_nulls: bool = False,
+        include_defaults: bool = True,
+        parameterized: bool = True,
+    ) -> str | tuple[str, tuple[Any, ...]]:
+        """Build a INSERT OR IGNORE ... SQL for this row."""
+        payload = self._dump_for_sql(
+            include_nulls=include_nulls,
+            include_defaults=include_defaults,
+        )
+        columns = list(payload.keys())
+        table_sql = self._quote_identifier(self.table_name())
+        col_sql = ", ".join(self._quote_identifier(col) for col in columns)
+
+        if parameterized:
+            placeholders = ", ".join("?" for _ in columns)
+            sql = f"INSERT OR IGNORE INTO {table_sql} ({col_sql}) VALUES ({placeholders});"
+            params = tuple(self._coerce_sql_value(payload[col]) for col in columns)
+            return sql, params
+
+        value_sql = ", ".join(self._sql_literal(payload[col]) for col in columns)
+        return f"INSERT OR IGNORE INTO {table_sql} ({col_sql}) VALUES ({value_sql});"
+
+
+    def bulk_insert_or_ignore_sql(
+        rows: Sequence[CanoeBaseModel],
+        *,
+        include_nulls: bool = False,
+        include_defaults: bool = True,
+    ) -> tuple[str, list[tuple[Any, ...]]]:
+        """Build an INSERT OR IGNORE ... SQL and parameter tuples for a batch of rows."""
+        if not rows:
+            raise ValueError("rows must not be empty")
+
+        row_type = type(rows[0])
+        if not all(type(row) is row_type for row in rows):
+            raise TypeError(
+                f"All rows must be the same type, got: "
+                f"{', '.join(sorted({type(r).__name__ for r in rows}))}"
+            )
+
+        first = rows[0]
+        payload = first._dump_for_sql(
+            include_nulls=include_nulls,
+            include_defaults=include_defaults,
+        )
+        columns = list(payload.keys())
+        table_sql = first._quote_identifier(first.table_name())
+        col_sql = ", ".join(first._quote_identifier(col) for col in columns)
+        placeholders = ", ".join("?" for _ in columns)
+
+        sql = f"INSERT OR IGNORE INTO {table_sql} ({col_sql}) VALUES ({placeholders});"
+
+        params = [
+            tuple(row._coerce_sql_value(row._dump_for_sql(
+                include_nulls=include_nulls,
+                include_defaults=include_defaults,
+            )[col]) for col in columns)
+            for row in rows
+        ]
+
+        return sql, params
