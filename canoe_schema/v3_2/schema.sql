@@ -1497,12 +1497,6 @@ CREATE TABLE IF NOT EXISTS TimePeriod
     flag     TEXT
         REFERENCES TimePeriodType (label)
 );
-REPLACE INTO TimePeriod VALUES (0, 2025, 'f');
-REPLACE INTO TimePeriod VALUES (1, 2030, 'f');
-REPLACE INTO TimePeriod VALUES (2, 2035, 'f');
-REPLACE INTO TimePeriod VALUES (3, 2040, 'f');
-REPLACE INTO TimePeriod VALUES (4, 2045, 'f');
-REPLACE INTO TimePeriod VALUES (5, 2050, 'f');
 CREATE TABLE IF NOT EXISTS TimeSeason
 (
     period INTEGER
