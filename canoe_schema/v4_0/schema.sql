@@ -5,7 +5,7 @@ BEGIN TRANSACTION;
 -- Metadata
 -- ============================================================
 
-CREAT TABLE IF NOT EXISTS metadata
+CREATE TABLE IF NOT EXISTS metadata
 (
     element TEXT PRIMARY KEY,
     value   INT,
