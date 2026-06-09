@@ -1,4 +1,4 @@
-__version__ = "3.2.0"
+__version__ = "4.0.0"
 
 from .base import CanoeBaseModel
 from .sql import get_sql_schema, schema_path
