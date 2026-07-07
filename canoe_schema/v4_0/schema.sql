@@ -1475,7 +1475,7 @@ CREATE TABLE IF NOT EXISTS output_objective
     objective_name    TEXT,
     total_system_cost REAL
 );
--- CREATE TABLE IF NOT EXISTS output_curtailment
+CREATE TABLE IF NOT EXISTS output_curtailment
 (
     scenario    TEXT,
     region      TEXT,
