@@ -1462,5 +1462,233 @@ CREATE TABLE IF NOT EXISTS rps_requirement
     PRIMARY KEY (region, period, tech_group, data_id)
 );
 
+CREATE TABLE IF NOT EXISTS output_dual_variable
+(
+    scenario        TEXT,
+    constraint_name TEXT,
+    dual            REAL,
+    PRIMARY KEY (constraint_name, scenario)
+);
+CREATE TABLE IF NOT EXISTS output_objective
+(
+    scenario          TEXT,
+    objective_name    TEXT,
+    total_system_cost REAL
+);
+-- CREATE TABLE IF NOT EXISTS output_curtailment
+(
+    scenario    TEXT,
+    region      TEXT,
+    sector      TEXT,
+    period      INTEGER
+        REFERENCES time_period (period),
+    season      TEXT
+        REFERENCES time_season (season),
+    tod         TEXT
+        REFERENCES time_of_day (tod),
+    input_comm  TEXT
+        REFERENCES commodity (name),
+    tech        TEXT
+        REFERENCES technology (tech),
+    vintage     INTEGER
+        REFERENCES time_period (period),
+    output_comm TEXT
+        REFERENCES commodity (name),
+    curtailment REAL,
+    units       TEXT,
+    PRIMARY KEY (region, scenario, period, season, tod, input_comm, tech, vintage, output_comm)
+);
+CREATE TABLE IF NOT EXISTS output_net_capacity
+(
+    scenario TEXT,
+    region   TEXT,
+    sector   TEXT
+        REFERENCES sector_label (sector),
+    period   INTEGER
+        REFERENCES time_period (period),
+    tech     TEXT
+        REFERENCES technology (tech),
+    vintage  INTEGER
+        REFERENCES time_period (period),
+    capacity REAL,
+    units    TEXT,
+    PRIMARY KEY (region, scenario, period, tech, vintage)
+);
+CREATE TABLE IF NOT EXISTS output_built_capacity
+(
+    scenario TEXT,
+    region   TEXT,
+    sector   TEXT
+        REFERENCES sector_label (sector),
+    tech     TEXT
+        REFERENCES technology (tech),
+    vintage  INTEGER
+        REFERENCES time_period (period),
+    capacity REAL,
+    units    TEXT,
+    PRIMARY KEY (region, scenario, tech, vintage)
+);
+CREATE TABLE IF NOT EXISTS output_retired_capacity
+(
+    scenario TEXT,
+    region   TEXT,
+    sector   TEXT
+        REFERENCES sector_label (sector),
+    period   INTEGER
+        REFERENCES time_period (period),
+    tech     TEXT
+        REFERENCES technology (tech),
+    vintage  INTEGER
+        REFERENCES time_period (period),
+    cap_eol REAL,
+    cap_early REAL,
+    units     TEXT,
+    PRIMARY KEY (region, scenario, period, tech, vintage)
+);
+CREATE TABLE IF NOT EXISTS output_flow_in
+(
+    scenario    TEXT,
+    region      TEXT,
+    sector      TEXT
+        REFERENCES sector_label (sector),
+    period      INTEGER
+        REFERENCES time_period (period),
+    season TEXT
+        REFERENCES time_season (season),
+    tod         TEXT
+        REFERENCES time_of_day (tod),
+    input_comm  TEXT
+        REFERENCES commodity (name),
+    tech        TEXT
+        REFERENCES technology (tech),
+    vintage     INTEGER
+        REFERENCES time_period (period),
+    output_comm TEXT
+        REFERENCES commodity (name),
+    flow        REAL,
+    units       TEXT,
+    PRIMARY KEY (region, scenario, period, season, tod, input_comm, tech, vintage, output_comm)
+);
+CREATE TABLE IF NOT EXISTS output_flow_out
+(
+    scenario    TEXT,
+    region      TEXT,
+    sector      TEXT
+        REFERENCES sector_label (sector),
+    period      INTEGER
+        REFERENCES time_period (period),
+    season TEXT
+        REFERENCES time_season (season),
+    tod         TEXT
+        REFERENCES time_of_day (tod),
+    input_comm  TEXT
+        REFERENCES commodity (name),
+    tech        TEXT
+        REFERENCES technology (tech),
+    vintage     INTEGER
+        REFERENCES time_period (period),
+    output_comm TEXT
+        REFERENCES commodity (name),
+    flow        REAL,
+    units       TEXT,
+    PRIMARY KEY (region, scenario, period, season, tod, input_comm, tech, vintage, output_comm)
+);
+CREATE TABLE IF NOT EXISTS output_storage_level
+(
+    scenario TEXT,
+    region TEXT,
+    sector TEXT
+        REFERENCES sector_label (sector),
+    period INTEGER
+        REFERENCES time_period (period),
+    season TEXT,
+    tod TEXT
+        REFERENCES time_of_day (tod),
+    tech TEXT
+        REFERENCES technology (tech),
+    vintage INTEGER
+        REFERENCES time_period (period),
+    level REAL,
+    units TEXT,
+    PRIMARY KEY (scenario, region, period, season, tod, tech, vintage)
+);
+CREATE TABLE IF NOT EXISTS output_emission
+(
+    scenario  TEXT,
+    region    TEXT,
+    sector    TEXT
+        REFERENCES sector_label (sector),
+    period    INTEGER
+        REFERENCES time_period (period),
+    emis_comm TEXT
+        REFERENCES commodity (name),
+    tech      TEXT
+        REFERENCES technology (tech),
+    vintage   INTEGER
+        REFERENCES time_period (period),
+    emission  REAL,
+    units     TEXT,
+    PRIMARY KEY (region, scenario, period, emis_comm, tech, vintage)
+);
+CREATE TABLE IF NOT EXISTS output_cost
+(
+    scenario TEXT,
+    region   TEXT,
+    sector   TEXT REFERENCES sector_label (sector),
+    period   INTEGER REFERENCES time_period (period),
+    tech     TEXT REFERENCES technology (tech),
+    vintage  INTEGER REFERENCES time_period (period),
+    d_invest REAL,
+    d_fixed  REAL,
+    d_var    REAL,
+    d_emiss  REAL,
+    invest   REAL,
+    fixed    REAL,
+    var      REAL,
+    emiss    REAL,
+    units    TEXT,
+    PRIMARY KEY (scenario, region, period, tech, vintage),
+    FOREIGN KEY (vintage) REFERENCES time_period (period),
+    FOREIGN KEY (tech) REFERENCES technology (tech)
+);
+CREATE TABLE IF NOT EXISTS myopic_efficiency
+(
+    base_year   integer,
+    region      text,
+    input_comm  TEXT
+        REFERENCES commodity (name),
+    tech        TEXT
+        REFERENCES technology (tech),
+    vintage     INTEGER
+        REFERENCES time_period (period),
+    output_comm TEXT
+        REFERENCES commodity (name),
+    efficiency  real,
+    lifetime    integer,
+    PRIMARY KEY (region, input_comm, tech, vintage, output_comm)
+);
+-- for efficient searching by rtv:
+-- CREATE INDEX IF NOT EXISTS region_tech_vintage ON myopic_efficiency (region, tech, vintage);
+
+CREATE TABLE IF NOT EXISTS output_flow_out_summary
+(
+    scenario    TEXT,
+    region      TEXT,
+    sector      TEXT
+        REFERENCES sector_label (sector),
+    period      INTEGER
+        REFERENCES time_period (period),
+    input_comm  TEXT
+        REFERENCES commodity (name),
+    tech        TEXT
+        REFERENCES technology (tech),
+    vintage     INTEGER
+        REFERENCES time_period (period),
+    output_comm TEXT
+        REFERENCES commodity (name),
+    flow        REAL,
+    PRIMARY KEY (scenario, region, period, input_comm, tech, vintage, output_comm)
+);
+
 COMMIT;
 PRAGMA foreign_keys = ON;
