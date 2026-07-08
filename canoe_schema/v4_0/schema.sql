@@ -1487,13 +1487,13 @@ CREATE TABLE IF NOT EXISTS output_curtailment
     tod         TEXT
         REFERENCES time_of_day (tod),
     input_comm  TEXT
-        REFERENCES commodity (name),
+        REFERENCES commodity_label (name),
     tech        TEXT
-        REFERENCES technology (tech),
+        REFERENCES technology_label (tech),
     vintage     INTEGER
         REFERENCES time_period (period),
     output_comm TEXT
-        REFERENCES commodity (name),
+        REFERENCES commodity_label (name),
     curtailment REAL,
     units       TEXT,
     PRIMARY KEY (region, scenario, period, season, tod, input_comm, tech, vintage, output_comm)
@@ -1507,7 +1507,7 @@ CREATE TABLE IF NOT EXISTS output_net_capacity
     period   INTEGER
         REFERENCES time_period (period),
     tech     TEXT
-        REFERENCES technology (tech),
+        REFERENCES technology_label (tech),
     vintage  INTEGER
         REFERENCES time_period (period),
     capacity REAL,
@@ -1521,7 +1521,7 @@ CREATE TABLE IF NOT EXISTS output_built_capacity
     sector   TEXT
         REFERENCES sector_label (sector),
     tech     TEXT
-        REFERENCES technology (tech),
+        REFERENCES technology_label (tech),
     vintage  INTEGER
         REFERENCES time_period (period),
     capacity REAL,
@@ -1537,7 +1537,7 @@ CREATE TABLE IF NOT EXISTS output_retired_capacity
     period   INTEGER
         REFERENCES time_period (period),
     tech     TEXT
-        REFERENCES technology (tech),
+        REFERENCES technology_label (tech),
     vintage  INTEGER
         REFERENCES time_period (period),
     cap_eol REAL,
@@ -1558,13 +1558,13 @@ CREATE TABLE IF NOT EXISTS output_flow_in
     tod         TEXT
         REFERENCES time_of_day (tod),
     input_comm  TEXT
-        REFERENCES commodity (name),
+        REFERENCES commodity_label (name),
     tech        TEXT
-        REFERENCES technology (tech),
+        REFERENCES technology_label (tech),
     vintage     INTEGER
         REFERENCES time_period (period),
     output_comm TEXT
-        REFERENCES commodity (name),
+        REFERENCES commodity_label (name),
     flow        REAL,
     units       TEXT,
     PRIMARY KEY (region, scenario, period, season, tod, input_comm, tech, vintage, output_comm)
@@ -1582,13 +1582,13 @@ CREATE TABLE IF NOT EXISTS output_flow_out
     tod         TEXT
         REFERENCES time_of_day (tod),
     input_comm  TEXT
-        REFERENCES commodity (name),
+        REFERENCES commodity_label (name),
     tech        TEXT
-        REFERENCES technology (tech),
+        REFERENCES technology_label (tech),
     vintage     INTEGER
         REFERENCES time_period (period),
     output_comm TEXT
-        REFERENCES commodity (name),
+        REFERENCES commodity_label (name),
     flow        REAL,
     units       TEXT,
     PRIMARY KEY (region, scenario, period, season, tod, input_comm, tech, vintage, output_comm)
@@ -1605,7 +1605,7 @@ CREATE TABLE IF NOT EXISTS output_storage_level
     tod TEXT
         REFERENCES time_of_day (tod),
     tech TEXT
-        REFERENCES technology (tech),
+        REFERENCES technology_label (tech),
     vintage INTEGER
         REFERENCES time_period (period),
     level REAL,
@@ -1621,9 +1621,9 @@ CREATE TABLE IF NOT EXISTS output_emission
     period    INTEGER
         REFERENCES time_period (period),
     emis_comm TEXT
-        REFERENCES commodity (name),
+        REFERENCES commodity_label (name),
     tech      TEXT
-        REFERENCES technology (tech),
+        REFERENCES technology_label (tech),
     vintage   INTEGER
         REFERENCES time_period (period),
     emission  REAL,
@@ -1636,7 +1636,7 @@ CREATE TABLE IF NOT EXISTS output_cost
     region   TEXT,
     sector   TEXT REFERENCES sector_label (sector),
     period   INTEGER REFERENCES time_period (period),
-    tech     TEXT REFERENCES technology (tech),
+    tech     TEXT REFERENCES technology_label (tech),
     vintage  INTEGER REFERENCES time_period (period),
     d_invest REAL,
     d_fixed  REAL,
@@ -1649,20 +1649,20 @@ CREATE TABLE IF NOT EXISTS output_cost
     units    TEXT,
     PRIMARY KEY (scenario, region, period, tech, vintage),
     FOREIGN KEY (vintage) REFERENCES time_period (period),
-    FOREIGN KEY (tech) REFERENCES technology (tech)
+    FOREIGN KEY (tech) REFERENCES technology_label (tech)
 );
 CREATE TABLE IF NOT EXISTS myopic_efficiency
 (
     base_year   integer,
     region      text,
     input_comm  TEXT
-        REFERENCES commodity (name),
+        REFERENCES commodity_label (name),
     tech        TEXT
-        REFERENCES technology (tech),
+        REFERENCES technology_label (tech),
     vintage     INTEGER
         REFERENCES time_period (period),
     output_comm TEXT
-        REFERENCES commodity (name),
+        REFERENCES commodity_label (name),
     efficiency  real,
     lifetime    integer,
     PRIMARY KEY (region, input_comm, tech, vintage, output_comm)
@@ -1679,13 +1679,13 @@ CREATE TABLE IF NOT EXISTS output_flow_out_summary
     period      INTEGER
         REFERENCES time_period (period),
     input_comm  TEXT
-        REFERENCES commodity (name),
+        REFERENCES commodity_label (name),
     tech        TEXT
-        REFERENCES technology (tech),
+        REFERENCES technology_label (tech),
     vintage     INTEGER
         REFERENCES time_period (period),
     output_comm TEXT
-        REFERENCES commodity (name),
+        REFERENCES commodity_label (name),
     flow        REAL,
     PRIMARY KEY (scenario, region, period, input_comm, tech, vintage, output_comm)
 );
