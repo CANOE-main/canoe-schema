@@ -37,6 +37,7 @@ because there is nothing to roll back — if anything goes wrong, the
 | `--discount-rate {keep,adopt-v4-default}` | `keep` | `metadata_real.global_discount_rate` / `default_loan_rate`. v4.0's schema default changed from 0.03 to 0.05; `keep` preserves whatever the source database was actually calibrated to. |
 | `--tech-group-collision {warn,error}` | `warn` | Checks whether any name exists in both `technology_label` and `tech_group_label` — such a name is ambiguous wherever `tech_or_group` is used (see `NOTES.md`). |
 | `--days-per-period N` | auto (from source `MetaData`, else 365) | Used only to compute `time_season_sequential.segment_fraction = num_days / days_per_period`; the metadata field itself has no home in v4.0 and is dropped after being consumed. |
+| `--backfill-labels` | off | Backfills `commodity_label`, `technology_label`, `sector_label`, `data_source_label` from the values actually present in the migrated `commodity`/`technology`/`data_source` tables — catches any name used in the source data but never registered in its v3.2 label table. Off by default: without it, such gaps surface later as `PRAGMA foreign_key_check` violations instead. |
 
 **Always logged as a loud warning, no flag (nothing to decide, just no source data):**
 
@@ -60,6 +61,7 @@ python canoe_schema/v3_2/migrations/to_v4_0/migrate.py path/to/database.db
 | `--discount-rate` | `keep` | See table above |
 | `--tech-group-collision` | `warn` | See table above |
 | `--days-per-period N` | auto | See table above |
+| `--backfill-labels` | off | See table above |
 | `--dry-run` | | Run all checks and log every decision; write nothing to disk |
 | `-v / --verbose` | | Enable debug-level logging |
 

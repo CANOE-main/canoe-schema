@@ -310,13 +310,6 @@ def migrate(
                         )
                     else:
                         raise
-            except sqlite3.OperationalError as e:
-                if "no such column" in str(e):
-                    logger.warning(
-                        "`vintage` column does not exist in LACF. Skipping rename."
-                    )
-                else:
-                    raise
 
         # ── Run SQL (phases 1, 3, 4, 5) ───────────────────────────────────────
         if dry_run:

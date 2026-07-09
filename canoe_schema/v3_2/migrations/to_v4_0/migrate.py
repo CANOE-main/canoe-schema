@@ -8,6 +8,7 @@ Usage:
                        [--discount-rate {keep,adopt-v4-default}]
                        [--tech-group-collision {warn,error}]
                        [--days-per-period N]
+                       [--backfill-labels]
                        [--dry-run] [-v]
 
 Unlike the v3.1 -> v3.2 migration, this one does NOT modify the source file
@@ -34,6 +35,9 @@ Phases:
     1. Preflight     — verify the source is a valid v3.2 schema.
     2. Schema create — build the v4.0 schema in the new output file.
     3. Static copy   — run migrate.sql (pure renames / additions, no policy).
+    3b. Label backfill (opt-in, --backfill-labels) — commodity_label,
+                        technology_label, sector_label, data_source_label from
+                        DEFAULT_LABEL_SPECS.
     4. Collapse      — capacity_factor_process/tech, limit_seasonal_capacity_factor,
                         limit_storage_level_fraction, reserve_capacity_derate
                         (all drop `period` from the primary key).
@@ -70,6 +74,16 @@ V4_0_SCHEMA_SQL = _CANOE_SCHEMA_DIR / "v4_0" / "schema.sql"
 V3_2_SCHEMA_SQL = _CANOE_SCHEMA_DIR / "v3_2" / "schema.sql"
 
 DEFAULT_DAYS_PER_PERIOD = 365
+
+# (label_table, label_column, source_table, source_column) -- all four refer to
+# already-migrated v4.0 tables (not `src.*`), since this runs after the static
+# copy phase has populated commodity/technology/data_source.
+DEFAULT_LABEL_SPECS: tuple[tuple[str, str, str, str], ...] = (
+    ("commodity_label", "commodity", "commodity", "name"),
+    ("technology_label", "tech", "technology", "tech"),
+    ("sector_label", "sector", "technology", "sector"),
+    ("data_source_label", "source_id", "data_source", "source_id"),
+)
 
 
 # ---------------------------------------------------------------------------
@@ -571,6 +585,38 @@ def _migrate_metadata(
 
 
 # ---------------------------------------------------------------------------
+# Label table backfill (opt-in)
+# ---------------------------------------------------------------------------
+
+def _backfill_labels(cur: sqlite3.Cursor) -> None:
+    """
+    Backfill commodity_label/technology_label/sector_label/data_source_label
+    from the values actually present in the already-copied v4.0 commodity/
+    technology/data_source tables (see DEFAULT_LABEL_SPECS). These four label
+    tables already exist in v3.2 and are copied verbatim by migrate.sql, so
+    this only adds rows if that source data had gaps -- a name used in the
+    base table but never registered in its v3.2 label table.
+    """
+    for label_table, label_column, source_table, source_column in DEFAULT_LABEL_SPECS:
+        cur.execute(
+            f'INSERT OR IGNORE INTO "{label_table}" ("{label_column}") '
+            f'SELECT DISTINCT "{source_column}" FROM "{source_table}" '
+            f'WHERE "{source_column}" IS NOT NULL'
+        )
+        added = _changes(cur)
+        if added:
+            logger.warning(
+                f"{label_table}: backfilled {added} value(s) found in "
+                f"{source_table}.{source_column} but missing from the source "
+                f"v3.2 {label_table} table."
+            )
+        else:
+            logger.info(
+                f"{label_table}: already covers every {source_table}.{source_column} value."
+            )
+
+
+# ---------------------------------------------------------------------------
 # Tech / tech-group namespace collision check
 # ---------------------------------------------------------------------------
 
@@ -632,6 +678,7 @@ def migrate(
     discount_policy: DiscountRatePolicy,
     tech_group_policy: TechGroupCollisionPolicy,
     days_per_period_override: int | None,
+    backfill_labels: bool,
     force: bool,
     dry_run: bool,
 ) -> None:
@@ -662,6 +709,10 @@ def migrate(
 
         logger.info("Phase 3: static table copies (pure renames / additions) …")
         _run_static_migration_sql(conn)
+
+        if backfill_labels:
+            logger.info("Phase 3b: backfilling label tables (--backfill-labels) …")
+            _backfill_labels(cur)
 
         logger.info("Phase 4: collapsing tables that drop 'period' from the primary key …")
         for table in COLLAPSE_TABLES:
@@ -792,6 +843,17 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--backfill-labels", action="store_true", dest="backfill_labels",
+        help=(
+            "Backfill commodity_label, technology_label, sector_label, and "
+            "data_source_label from the values actually present in the migrated "
+            "commodity/technology/data_source tables, catching any name used in "
+            "the source data but never registered in its v3.2 label table. Off "
+            "by default: without this flag, such gaps surface later as PRAGMA "
+            "foreign_key_check violations instead."
+        ),
+    )
+    parser.add_argument(
         "--dry-run", action="store_true",
         help="Run all checks and log what would happen; write nothing to disk.",
     )
@@ -807,7 +869,7 @@ def main() -> None:
 
     output_path = (
         args.output.resolve() if args.output
-        else source_path.with_suffix(".v4_0.db")
+        else source_path.with_suffix(".v4_0.sqlite")
     )
 
     migrate(
@@ -817,6 +879,7 @@ def main() -> None:
         discount_policy=DiscountRatePolicy(args.discount_rate),
         tech_group_policy=TechGroupCollisionPolicy(args.tech_group_collision),
         days_per_period_override=args.days_per_period,
+        backfill_labels=args.backfill_labels,
         force=args.force,
         dry_run=args.dry_run,
     )
