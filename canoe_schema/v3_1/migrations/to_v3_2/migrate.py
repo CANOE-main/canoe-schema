@@ -379,8 +379,8 @@ def main() -> None:
         "--allow-lcf-vintage",
         action="store_true",
         help=(
-            "If the LimitCapacityFactor table has a `vintage` row, treat it as"
-            "`period` instead of failing"
+            "If the LimitAnnualCapacityFactor table has a `vintage` column, treat it as "
+            "`period` instead of failing."
         ),
     )
     parser.add_argument(
