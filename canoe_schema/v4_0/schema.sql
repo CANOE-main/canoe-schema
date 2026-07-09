@@ -20,8 +20,8 @@ CREATE TABLE IF NOT EXISTS metadata_real
     value   REAL,
     notes   TEXT
 );
-REPLACE INTO metadata_real VALUES ('global_discount_rate', 0.05, 'Discount Rate for future costs');
-REPLACE INTO metadata_real VALUES ('default_loan_rate', 0.05, 'Default Loan Rate if not specified in loan_rate table');
+REPLACE INTO metadata_real VALUES ('global_discount_rate', 0.03, 'Discount Rate for future costs');
+REPLACE INTO metadata_real VALUES ('default_loan_rate', 0.03, 'Default Loan Rate if not specified in loan_rate table');
 
 -- ============================================================
 -- Label / registry tables

@@ -16,6 +16,7 @@ Phases:
 The entire migration runs inside a single transaction. Any error triggers a
 full rollback so the source database is never left in a partial state.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -45,16 +46,18 @@ _MATCH_SCHEMA = _REPO_ROOT / "tools" / "match_schema.py"
 # Enums
 # ---------------------------------------------------------------------------
 
+
 class DuplicateTechPolicy(str, Enum):
-    ERROR = "error"   # Abort the migration (default)
-    WARN  = "warn"    # Log a warning and continue; duplicates left as-is
-    FIX   = "fix"     # Keep the entry with the most Efficiency references
-                      # (tiebreak: alphabetically lowest data_id)
+    ERROR = "error"  # Abort the migration (default)
+    WARN = "warn"  # Log a warning and continue; duplicates left as-is
+    FIX = "fix"  # Keep the entry with the most Efficiency references
+    # (tiebreak: alphabetically lowest data_id)
 
 
 # ---------------------------------------------------------------------------
 # Preflight
 # ---------------------------------------------------------------------------
+
 
 def _preflight(db_path: Path) -> None:
     """
@@ -86,8 +89,10 @@ def _preflight(db_path: Path) -> None:
                     f"Structural match score against v3.1: {best['score'] if best else 'n/a'}"
                 )
         except ImportError:
-            logger.warning("match_schema module found but could not be imported; "
-                           "falling back to MetaData version check.")
+            logger.warning(
+                "match_schema module found but could not be imported; "
+                "falling back to MetaData version check."
+            )
         finally:
             sys.path.pop(0)
 
@@ -116,6 +121,7 @@ def _preflight(db_path: Path) -> None:
 # ---------------------------------------------------------------------------
 # Phase 2 — Duplicate technology detection & resolution
 # ---------------------------------------------------------------------------
+
 
 def _find_duplicate_techs(cur: sqlite3.Cursor) -> dict[str, list[str]]:
     """
@@ -211,6 +217,7 @@ def _resolve_duplicates(
 # Phase 3 — LimitAnnualCapacityFactor warning
 # ---------------------------------------------------------------------------
 
+
 def _warn_lacf(cur: sqlite3.Cursor) -> None:
     """
     Warn the user that LimitAnnualCapacityFactor will be structurally changed:
@@ -235,6 +242,7 @@ def _warn_lacf(cur: sqlite3.Cursor) -> None:
 # Core migration runner
 # ---------------------------------------------------------------------------
 
+
 def _run_migration_sql(conn: sqlite3.Connection) -> None:
     """Execute the SQL migration script against an open connection."""
     sql = MIGRATION_SQL.read_text(encoding="utf-8")
@@ -248,6 +256,7 @@ def _run_migration_sql(conn: sqlite3.Connection) -> None:
 def migrate(
     db_path: Path,
     policy: DuplicateTechPolicy,
+    allow_lacf_vintage: bool,
     dry_run: bool,
 ) -> None:
     # ── Preflight ────────────────────────────────────────────────────────────
@@ -281,6 +290,25 @@ def migrate(
         logger.info("Phase 3: LimitAnnualCapacityFactor structural change …")
         _warn_lacf(cur)
 
+        # ── Rename vintage in LACF if needed ──────────────────────────────────
+        if allow_lacf_vintage:
+            # Check if `vintage` column exists and rename if it does
+            # `vintage` column may not exist if the database
+            # was created before this migration
+            try:
+                logger.info("Renaming `vintage` column in LACF to `period` …")
+                cur.execute(
+                    "ALTER TABLE LimitAnnualCapacityFactor RENAME COLUMN vintage TO period"
+                )
+                conn.commit()
+            except sqlite3.OperationalError as e:
+                if "no such column" in str(e):
+                    logger.warning(
+                        "`vintage` column does not exist in LACF. Skipping rename."
+                    )
+                else:
+                    raise
+
         # ── Run SQL (phases 1, 3, 4, 5) ───────────────────────────────────────
         if dry_run:
             logger.warning("Dry run enabled — SQL migration will NOT be applied.")
@@ -310,6 +338,7 @@ def migrate(
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
+
 
 def _configure_logging(verbose: bool) -> None:
     logger.remove()
@@ -347,12 +376,21 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--allow-lcf-vintage",
+        action="store_true",
+        help=(
+            "If the LimitCapacityFactor table has a `vintage` row, treat it as"
+            "`period` instead of failing"
+        ),
+    )
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Run all checks and print what would happen, but do not modify the database.",
     )
     parser.add_argument(
-        "-v", "--verbose",
+        "-v",
+        "--verbose",
         action="store_true",
         help="Enable debug-level logging.",
     )
@@ -366,7 +404,9 @@ def main() -> None:
         raise SystemExit(1)
 
     policy = DuplicateTechPolicy(args.duplicate_tech)
-    migrate(db_path, policy, dry_run=args.dry_run)
+    migrate(
+        db_path, policy, allow_lacf_vintage=args.allow_lcf_vintage, dry_run=args.dry_run
+    )
 
 
 if __name__ == "__main__":
