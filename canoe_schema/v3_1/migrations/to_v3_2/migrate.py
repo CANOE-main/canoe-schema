@@ -292,15 +292,24 @@ def migrate(
 
         # ── Rename vintage in LACF if needed ──────────────────────────────────
         if allow_lacf_vintage:
-            # Check if `vintage` column exists and rename if it does
-            # `vintage` column may not exist if the database
-            # was created before this migration
-            try:
-                logger.info("Renaming `vintage` column in LACF to `period` …")
-                cur.execute(
-                    "ALTER TABLE LimitAnnualCapacityFactor RENAME COLUMN vintage TO period"
-                )
-                conn.commit()
+            # Dry-run should not mutate the source database.
+            if dry_run:
+                logger.warning("Dry run enabled — skipping LACF vintage→period rename.")
+            else:
+                # Check if `vintage` column exists and rename if it does.
+                # `vintage` column may not exist if the database was created before this migration.
+                try:
+                    logger.info("Renaming `vintage` column in LACF to `period` …")
+                    cur.execute(
+                        "ALTER TABLE LimitAnnualCapacityFactor RENAME COLUMN vintage TO period"
+                    )
+                except sqlite3.OperationalError as e:
+                    if "no such column" in str(e):
+                        logger.warning(
+                            "`vintage` column does not exist in LACF. Skipping rename."
+                        )
+                    else:
+                        raise
             except sqlite3.OperationalError as e:
                 if "no such column" in str(e):
                     logger.warning(
