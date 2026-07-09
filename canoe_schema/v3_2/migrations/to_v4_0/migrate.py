@@ -259,8 +259,9 @@ def _migrate_collapse_table(
         )
     elif n_collapsed_groups:
         logger.info(
-            f"{table.old_table}: all collapsed groups had identical '{table.measure_col}' "
-            f"values, so no data was lost by dropping {dropped_desc}."
+            f"{table.old_table}: all collapsed groups had identical '{table.measure_col}' values. "
+            f"Non-measure columns (notes/provenance) may still differ across periods and will be taken "
+            f"from the selected row per --collapse-policy (earliest unless keep-latest was requested)."
         )
 
     order_dir = "DESC" if policy == CollapsePolicy.KEEP_LATEST else "ASC"
