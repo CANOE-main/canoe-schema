@@ -69,7 +69,7 @@ class SchemaDiff:
 class TableDiff:
     name_a: str
     name_b: str
-    match_kind: str | None   # None=exact, 'case'=renamed, 'fuzzy'=fuzzy match
+    match_kind: str | None   # None=exact, 'case'=renamed, 'norm'=normalized snake↔camel, 'fuzzy'=fuzzy match
     pk_cols: list[str]       # A-side PK column names, or ['rowid']
     count_a: int
     count_b: int
