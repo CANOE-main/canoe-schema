@@ -85,12 +85,12 @@ ALTER TABLE LimitAnnualCapacityFactor_new
 
 -- ── Phase 4: Seed TimePeriod (upsert) ────────────────────────────────────────
 
-REPLACE INTO TimePeriod (sequence, period, flag) VALUES (0, 2025, 'f');
-REPLACE INTO TimePeriod (sequence, period, flag) VALUES (1, 2030, 'f');
-REPLACE INTO TimePeriod (sequence, period, flag) VALUES (2, 2035, 'f');
-REPLACE INTO TimePeriod (sequence, period, flag) VALUES (3, 2040, 'f');
-REPLACE INTO TimePeriod (sequence, period, flag) VALUES (4, 2045, 'f');
-REPLACE INTO TimePeriod (sequence, period, flag) VALUES (5, 2050, 'f');
+-- REPLACE INTO TimePeriod (sequence, period, flag) VALUES (0, 2025, 'f');
+-- REPLACE INTO TimePeriod (sequence, period, flag) VALUES (1, 2030, 'f');
+-- REPLACE INTO TimePeriod (sequence, period, flag) VALUES (2, 2035, 'f');
+-- REPLACE INTO TimePeriod (sequence, period, flag) VALUES (3, 2040, 'f');
+-- REPLACE INTO TimePeriod (sequence, period, flag) VALUES (4, 2045, 'f');
+-- REPLACE INTO TimePeriod (sequence, period, flag) VALUES (5, 2050, 'f');
 
 -- ── Phase 5: Update MetaData version ─────────────────────────────────────────
 
