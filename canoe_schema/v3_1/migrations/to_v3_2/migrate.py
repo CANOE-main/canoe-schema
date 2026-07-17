@@ -5,6 +5,10 @@ migrate.py — Migrate a CANOE SQLite database from schema v3.1 to v3.2.
 Usage:
     python migrate.py <sqlite_db> [--duplicate-tech {error,warn,fix}] [--dry-run]
 
+    --duplicate-tech defaults to 'warn': duplicate tech names across datasets
+    are logged but left in place, to be resolved later by a data_id-level
+    filtering step.
+
 Phases:
     1. Preflight  — verify the database is a valid v3.1 schema.
     2. Label pop  — populate TechnologyLabel, CommodityLabel, DataSourceLabel.
@@ -48,8 +52,8 @@ _MATCH_SCHEMA = _REPO_ROOT / "tools" / "match_schema.py"
 
 
 class DuplicateTechPolicy(str, Enum):
-    ERROR = "error"  # Abort the migration (default)
-    WARN = "warn"  # Log a warning and continue; duplicates left as-is
+    ERROR = "error"  # Abort the migration
+    WARN = "warn"  # Log a warning and continue; duplicates left as-is (default)
     FIX = "fix"  # Keep the entry with the most Efficiency references
     # (tiebreak: alphabetically lowest data_id)
 
@@ -367,12 +371,12 @@ def main() -> None:
     parser.add_argument(
         "--duplicate-tech",
         choices=[p.value for p in DuplicateTechPolicy],
-        default=DuplicateTechPolicy.ERROR.value,
+        default=DuplicateTechPolicy.WARN.value,
         dest="duplicate_tech",
         help=(
             "How to handle technology names that appear in multiple datasets. "
-            "'error' (default): abort the migration. "
-            "'warn': log a warning and continue without changes. "
+            "'error': abort the migration. "
+            "'warn' (default): log a warning and continue without changes. "
             "'fix': keep the entry with the most Efficiency references "
             "(tiebreak: alphabetically lowest data_id)."
         ),
