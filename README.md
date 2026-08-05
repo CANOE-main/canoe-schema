@@ -18,10 +18,19 @@ for schema identification and database migration.
 │   │           ├── migrate.py      # Migration orchestrator (CLI)
 │   │           ├── migrate.sql     # Raw SQL executed by migrate.py
 │   │           └── README.md       # Migration-specific notes
-│   └── v3_2/
+│   ├── v3_2/
+│   │   ├── enums.py
+│   │   ├── models.py
+│   │   ├── schema.sql
+│   │   └── migrations/
+│   │       └── to_v4_0/
+│   │           ├── migrate.py      # Migration orchestrator (CLI)
+│   │           ├── migrate.sql     # Static (unconditional) table copies
+│   │           └── README.md       # Migration-specific notes
+│   └── v4_0/
 │       ├── enums.py
 │       ├── models.py
-│       └── schema_3_2.sql
+│       └── schema.sql
 └── tools/
     └── match_schema.py             # Identify the schema version of a database
 ```
@@ -66,7 +75,7 @@ the entire migration in a single transaction — rolling back on any error so th
 source database is never left in a partial state.
 
 #### v3.1 → v3.2
-> Most recent only, see `schema/version/migrations` for additional migrations
+> See `canoe_schema/<version>/migrations` for all available migrations (v3.2 → v4.0 is documented below)
 
 **What changes:**
 
@@ -113,6 +122,65 @@ Before applying any changes the script creates a backup at
 `<original_name>.v3_1.bak` in the same directory. If the migration fails for
 any reason the database is rolled back to its original state and the backup is
 preserved for reference.
+
+---
+
+#### v3.2 → v4.0
+
+Unlike the v3.1 → v3.2 migration, this one does **not** modify the source
+file in place — nearly every table is renamed from CamelCase to snake_case
+in v4.0, and SQLite table names are case-insensitive, so the old and new
+names can't coexist in one file. Instead the script builds a brand-new
+database from `canoe_schema/v4_0/schema.sql` and copies the source data
+across via an `ATTACH`ed connection. The source database is never written
+to, so there is no `.bak` file — see
+`canoe_schema/v3_2/migrations/to_v4_0/README.md` for the full breakdown of
+what's automatic vs. what needs a policy decision.
+
+**What changes:**
+
+| Phase | Description |
+|---|---|
+| 1 | Create the v4.0 schema in a new output file |
+| 2 | Static copy of ~68 tables (pure CamelCase → snake_case renames/additions) |
+| 3 | Resolve tables that drop `period` from their primary key (`capacity_factor_process/tech`, `limit_seasonal_capacity_factor`, `limit_storage_level_fraction`, `reserve_capacity_derate`) |
+| 4 | Compute `time_of_day.hours`, `time_season.segment_fraction`, `time_season_sequential.segment_fraction` (no v3.2 equivalents) |
+| 5 | Apply the discount/loan-rate policy and drop the now-unused `days_per_period` metadata |
+| 6 | Check for naming collisions between `technology_label` and the new `tech_group_label` |
+| 7 | `PRAGMA foreign_key_check` on the result |
+
+**Usage:**
+
+```bash
+python canoe_schema/v3_2/migrations/to_v4_0/migrate.py path/to/database.db
+```
+
+**Options:**
+
+| Flag | Default | Description |
+|---|---|---|
+| `--output PATH` | `<name>.v4_0.db` | Where to write the migrated database |
+| `--force` | | Overwrite `--output` if it already exists |
+| `--collapse-policy {error,keep-earliest,keep-latest,average}` | `error` | How to resolve genuinely conflicting values in tables that drop `period` |
+| `--discount-rate {keep,adopt-v4-default}` | `keep` | Preserve the source's economic rates, or adopt v4.0's new 0.05 default |
+| `--tech-group-collision {warn,error}` | `warn` | What to do if a name exists in both the technology and tech-group namespaces |
+| `--days-per-period N` | auto-detected | Override for computing `time_season_sequential.segment_fraction` |
+| `--dry-run` | | Run all checks and log every decision; write nothing to disk |
+| `-v / --verbose` | | Enable debug-level logging |
+
+**Examples:**
+
+```bash
+# Default: abort if any period-dropping table has genuinely conflicting values
+python canoe_schema/v3_2/migrations/to_v4_0/migrate.py my_model.db
+
+# Resolve conflicts with the latest period's value, adopt the new discount rate default
+python canoe_schema/v3_2/migrations/to_v4_0/migrate.py my_model.db \
+    --collapse-policy keep-latest --discount-rate adopt-v4-default
+
+# Preview every decision the migration would make, without writing anything
+python canoe_schema/v3_2/migrations/to_v4_0/migrate.py my_model.db --dry-run --verbose
+```
 
 ## Adding a New Migration
 

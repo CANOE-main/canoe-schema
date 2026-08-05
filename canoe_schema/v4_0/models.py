@@ -19,43 +19,309 @@ from .enums import (
 )
 
 
-class MetaData(CanoeBaseModel):
-    """Pydantic model for SQL table `MetaData`."""
-    __table_name__: ClassVar[str] = 'MetaData'
+# ===========================================================
+# Metadata
+# ===========================================================
+
+class Metadata(CanoeBaseModel):
+    """Pydantic model for SQL table `metadata`."""
+    __table_name__: ClassVar[str] = 'metadata'
     __primary_key__: ClassVar[tuple[str, ...]] = ('element',)
     element: str = ...
     value: int | None = None
     notes: str | None = None
 
 
-class MetaDataReal(CanoeBaseModel):
-    """Pydantic model for SQL table `MetaDataReal`."""
-    __table_name__: ClassVar[str] = 'MetaDataReal'
+class MetadataReal(CanoeBaseModel):
+    """Pydantic model for SQL table `metadata_real`."""
+    __table_name__: ClassVar[str] = 'metadata_real'
     __primary_key__: ClassVar[tuple[str, ...]] = ('element',)
     element: str = ...
     value: float | None = None
     notes: str | None = None
 
 
-class SeasonLabel(CanoeBaseModel):
-    """Pydantic model for SQL table `SeasonLabel`."""
-    __table_name__: ClassVar[str] = 'SeasonLabel'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('season',)
-    season: str = ...
+# ===========================================================
+# Label / registry tables
+# ===========================================================
+
+class CommodityLabel(CanoeBaseModel):
+    """Pydantic model for SQL table `commodity_label`."""
+    __table_name__: ClassVar[str] = 'commodity_label'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('commodity',)
+    commodity: str = ...
+    notes: str | None = None
+
+
+class TechnologyLabel(CanoeBaseModel):
+    """Pydantic model for SQL table `technology_label`."""
+    __table_name__: ClassVar[str] = 'technology_label'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('tech',)
+    tech: str = ...
+    notes: str | None = None
+
+
+class TechGroupLabel(CanoeBaseModel):
+    """Pydantic model for SQL table `tech_group_label`."""
+    __table_name__: ClassVar[str] = 'tech_group_label'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('group_name',)
+    group_name: str = ...
     notes: str | None = None
 
 
 class SectorLabel(CanoeBaseModel):
-    """Pydantic model for SQL table `SectorLabel`."""
-    __table_name__: ClassVar[str] = 'SectorLabel'
+    """Pydantic model for SQL table `sector_label`."""
+    __table_name__: ClassVar[str] = 'sector_label'
     __primary_key__: ClassVar[tuple[str, ...]] = ('sector',)
     sector: str = ...
     notes: str | None = None
 
 
+# ===========================================================
+# Enum / type tables
+# ===========================================================
+
+class CommodityType(CanoeBaseModel):
+    """Pydantic model for SQL table `commodity_type`."""
+    __table_name__: ClassVar[str] = 'commodity_type'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('label',)
+    label: str = ...
+    description: str | None = None
+
+
+class TechnologyType(CanoeBaseModel):
+    """Pydantic model for SQL table `technology_type`."""
+    __table_name__: ClassVar[str] = 'technology_type'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('label',)
+    label: str = ...
+    description: str | None = None
+
+
+class TimePeriodType(CanoeBaseModel):
+    """Pydantic model for SQL table `time_period_type`."""
+    __table_name__: ClassVar[str] = 'time_period_type'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('label',)
+    label: str = ...
+    description: str | None = None
+
+
+class Operator(CanoeBaseModel):
+    """Pydantic model for SQL table `operator`."""
+    __table_name__: ClassVar[str] = 'operator'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('operator',)
+    operator: OperatorCode = ...
+    notes: str | None = None
+
+
+# ===========================================================
+# Data quality and data source tables
+# ===========================================================
+
+class DataQualityCredibility(CanoeBaseModel):
+    """Pydantic model for SQL table `data_quality_credibility`."""
+    __table_name__: ClassVar[str] = 'data_quality_credibility'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('dq_cred',)
+    dq_cred: DataQualityCredibilityLevel = ...
+    description: str | None = None
+
+
+class DataQualityGeography(CanoeBaseModel):
+    """Pydantic model for SQL table `data_quality_geography`."""
+    __table_name__: ClassVar[str] = 'data_quality_geography'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('dq_geog',)
+    dq_geog: DataQualityGeographyLevel = ...
+    description: str | None = None
+
+
+class DataQualityStructure(CanoeBaseModel):
+    """Pydantic model for SQL table `data_quality_structure`."""
+    __table_name__: ClassVar[str] = 'data_quality_structure'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('dq_struc',)
+    dq_struc: DataQualityStructureLevel = ...
+    description: str | None = None
+
+
+class DataQualityTechnology(CanoeBaseModel):
+    """Pydantic model for SQL table `data_quality_technology`."""
+    __table_name__: ClassVar[str] = 'data_quality_technology'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('dq_tech',)
+    dq_tech: DataQualityTechnologyLevel = ...
+    description: str | None = None
+
+
+class DataQualityTime(CanoeBaseModel):
+    """Pydantic model for SQL table `data_quality_time`."""
+    __table_name__: ClassVar[str] = 'data_quality_time'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('dq_time',)
+    dq_time: DataQualityTimeLevel = ...
+    description: str | None = None
+
+
+class DataSourceLabel(CanoeBaseModel):
+    """Pydantic model for SQL table `data_source_label`."""
+    __table_name__: ClassVar[str] = 'data_source_label'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('source_id',)
+    source_id: str = ...
+    notes: str | None = None
+
+
+class DataSet(CanoeBaseModel):
+    """Pydantic model for SQL table `data_set`."""
+    __table_name__: ClassVar[str] = 'data_set'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('data_id',)
+    data_id: str = ...
+    label: str | None = None
+    version: str | None = None
+    description: str | None = None
+    status: str | None = None
+    author: str | None = None
+    date: str | None = None
+    parent_id: str | None = None
+    changelog: str | None = None
+    notes: str | None = None
+
+
+class DataSource(CanoeBaseModel):
+    """Pydantic model for SQL table `data_source`."""
+    __table_name__: ClassVar[str] = 'data_source'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('source_id', 'data_id')
+    source_id: str = ...
+    source: str | None = None
+    notes: str | None = None
+    data_id: str = ...
+
+
+# ===========================================================
+# Time tables
+# ===========================================================
+
+class TimePeriod(CanoeBaseModel):
+    """Pydantic model for SQL table `time_period`."""
+    __table_name__: ClassVar[str] = 'time_period'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('period',)
+    sequence: int | None = None
+    period: int = ...
+    flag: TimePeriodTypeCode | None = None
+
+
+class TimeOfDay(CanoeBaseModel):
+    """Pydantic model for SQL table `time_of_day`.
+
+    `hours` represents the number of hours in this time-of-day slice.
+    Defaults to 1 if not specified; must be > 0.
+    """
+    __table_name__: ClassVar[str] = 'time_of_day'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('tod',)
+    sequence: int | None = None
+    tod: str = ...
+    hours: float = Field(1.0, gt=0)
+    notes: str | None = None
+
+
+class TimeSeason(CanoeBaseModel):
+    """Pydantic model for SQL table `time_season`.
+
+    Replaces the 3.2 SeasonLabel / TimeSeason / TimeSegmentFraction trio.
+    `segment_fraction` is the global fraction of the year this season represents.
+    """
+    __table_name__: ClassVar[str] = 'time_season'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('season',)
+    sequence: int | None = None
+    season: str = ...
+    segment_fraction: float = Field(..., ge=0, le=1)
+    notes: str | None = None
+
+
+class TimeSeasonSequential(CanoeBaseModel):
+    """Pydantic model for SQL table `time_season_sequential`.
+
+    Replaces the 3.2 TimeSeasonSequential. Now period-independent:
+    `seas_seq` is the unique season-slice identifier; `segment_fraction`
+    replaces the old per-period `num_days` field.
+    """
+    __table_name__: ClassVar[str] = 'time_season_sequential'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('seas_seq',)
+    sequence: int | None = None
+    seas_seq: str = ...
+    season: str | None = None
+    segment_fraction: float = Field(..., ge=0, le=1)
+    notes: str | None = None
+
+
+# ===========================================================
+# Region
+# ===========================================================
+
+class Region(CanoeBaseModel):
+    """Pydantic model for SQL table `region`."""
+    __table_name__: ClassVar[str] = 'region'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('region',)
+    region: str = ...
+    notes: str | None = None
+
+
+# ===========================================================
+# Core model definition tables
+# ===========================================================
+
+class Commodity(CanoeBaseModel):
+    """Pydantic model for SQL table `commodity`."""
+    __table_name__: ClassVar[str] = 'commodity'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('name', 'data_id')
+    name: str = ...
+    flag: CommodityTypeCode | None = None
+    description: str | None = None
+    units: str | None = None
+    data_id: str = ...
+
+
+class Technology(CanoeBaseModel):
+    """Pydantic model for SQL table `technology`."""
+    __table_name__: ClassVar[str] = 'technology'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('tech', 'data_id')
+    tech: str = ...
+    flag: TechnologyTypeCode = ...
+    sector: str | None = None
+    category: str | None = None
+    sub_category: str | None = None
+    unlim_cap: int = 0
+    annual: int = 0
+    reserve: int = 0
+    curtail: int = 0
+    retire: int = 0
+    flex: int = 0
+    exchange: int = 0
+    seas_stor: int = 0
+    description: str | None = None
+    data_id: str = ...
+
+
+class TechGroup(CanoeBaseModel):
+    """Pydantic model for SQL table `tech_group`."""
+    __table_name__: ClassVar[str] = 'tech_group'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('group_name', 'data_id')
+    group_name: str = ...
+    notes: str | None = None
+    data_id: str = ...
+
+
+class TechGroupMember(CanoeBaseModel):
+    """Pydantic model for SQL table `tech_group_member`."""
+    __table_name__: ClassVar[str] = 'tech_group_member'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('group_name', 'tech', 'data_id')
+    group_name: str = ...
+    tech: str = ...
+    data_id: str = ...
+
+
+# ===========================================================
+# Data tables
+# All include: data_id (in PK), data_source, dq_cred/geog/struc/tech/time
+# ===========================================================
+
 class CapacityCredit(CanoeBaseModel):
-    """Pydantic model for SQL table `CapacityCredit`."""
-    __table_name__: ClassVar[str] = 'CapacityCredit'
+    """Pydantic model for SQL table `capacity_credit`."""
+    __table_name__: ClassVar[str] = 'capacity_credit'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'period', 'tech', 'vintage', 'data_id')
     region: str = ...
     period: int = ...
@@ -73,11 +339,14 @@ class CapacityCredit(CanoeBaseModel):
 
 
 class CapacityFactorProcess(CanoeBaseModel):
-    """Pydantic model for SQL table `CapacityFactorProcess`."""
-    __table_name__: ClassVar[str] = 'CapacityFactorProcess'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'period', 'season', 'tod', 'tech', 'vintage', 'data_id')
+    """Pydantic model for SQL table `capacity_factor_process`.
+
+    Note: `period` has been removed vs 3.2; capacity factors are now
+    season-global rather than per-period.
+    """
+    __table_name__: ClassVar[str] = 'capacity_factor_process'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'season', 'tod', 'tech', 'vintage', 'data_id')
     region: str = ...
-    period: int = ...
     season: str = ...
     tod: str = ...
     tech: str = ...
@@ -94,11 +363,13 @@ class CapacityFactorProcess(CanoeBaseModel):
 
 
 class CapacityFactorTech(CanoeBaseModel):
-    """Pydantic model for SQL table `CapacityFactorTech`."""
-    __table_name__: ClassVar[str] = 'CapacityFactorTech'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'period', 'season', 'tod', 'tech', 'data_id')
+    """Pydantic model for SQL table `capacity_factor_tech`.
+
+    Note: `period` has been removed vs 3.2.
+    """
+    __table_name__: ClassVar[str] = 'capacity_factor_tech'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'season', 'tod', 'tech', 'data_id')
     region: str = ...
-    period: int = ...
     season: str = ...
     tod: str = ...
     tech: str = ...
@@ -114,12 +385,13 @@ class CapacityFactorTech(CanoeBaseModel):
 
 
 class CapacityToActivity(CanoeBaseModel):
-    """Pydantic model for SQL table `CapacityToActivity`."""
-    __table_name__: ClassVar[str] = 'CapacityToActivity'
+    """Pydantic model for SQL table `capacity_to_activity`."""
+    __table_name__: ClassVar[str] = 'capacity_to_activity'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'tech', 'data_id')
     region: str = ...
     tech: str = ...
     c2a: float | None = None
+    units: str | None = None
     notes: str | None = None
     data_source: str | None = None
     dq_cred: DataQualityCredibilityLevel | None = None
@@ -130,35 +402,9 @@ class CapacityToActivity(CanoeBaseModel):
     data_id: str = ...
 
 
-class CommodityLabel(CanoeBaseModel):
-    """Pydantic model for SQL table `CommodityLabel`."""
-    __table_name__: ClassVar[str] = 'CommodityLabel'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('commodity',)
-    commodity: str = ...
-    notes: str | None = None
-
-
-class Commodity(CanoeBaseModel):
-    """Pydantic model for SQL table `Commodity`."""
-    __table_name__: ClassVar[str] = 'Commodity'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('name', 'data_id')
-    name: str = ...
-    flag: CommodityTypeCode | None = None
-    description: str | None = None
-    data_id: str = ...
-
-
-class CommodityType(CanoeBaseModel):
-    """Pydantic model for SQL table `CommodityType`."""
-    __table_name__: ClassVar[str] = 'CommodityType'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('label',)
-    label: str = ...
-    description: str | None = None
-
-
 class ConstructionInput(CanoeBaseModel):
-    """Pydantic model for SQL table `ConstructionInput`."""
-    __table_name__: ClassVar[str] = 'ConstructionInput'
+    """Pydantic model for SQL table `construction_input`."""
+    __table_name__: ClassVar[str] = 'construction_input'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'input_comm', 'tech', 'vintage', 'data_id')
     region: str = ...
     input_comm: str = ...
@@ -177,8 +423,8 @@ class ConstructionInput(CanoeBaseModel):
 
 
 class CostEmission(CanoeBaseModel):
-    """Pydantic model for SQL table `CostEmission`."""
-    __table_name__: ClassVar[str] = 'CostEmission'
+    """Pydantic model for SQL table `cost_emission`."""
+    __table_name__: ClassVar[str] = 'cost_emission'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'period', 'emis_comm', 'data_id')
     region: str = ...
     period: int = ...
@@ -196,8 +442,8 @@ class CostEmission(CanoeBaseModel):
 
 
 class CostFixed(CanoeBaseModel):
-    """Pydantic model for SQL table `CostFixed`."""
-    __table_name__: ClassVar[str] = 'CostFixed'
+    """Pydantic model for SQL table `cost_fixed`."""
+    __table_name__: ClassVar[str] = 'cost_fixed'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'period', 'tech', 'vintage', 'data_id')
     region: str = ...
     period: int = ...
@@ -216,8 +462,8 @@ class CostFixed(CanoeBaseModel):
 
 
 class CostInvest(CanoeBaseModel):
-    """Pydantic model for SQL table `CostInvest`."""
-    __table_name__: ClassVar[str] = 'CostInvest'
+    """Pydantic model for SQL table `cost_invest`."""
+    __table_name__: ClassVar[str] = 'cost_invest'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'tech', 'vintage', 'data_id')
     region: str = ...
     tech: str = ...
@@ -235,8 +481,8 @@ class CostInvest(CanoeBaseModel):
 
 
 class CostVariable(CanoeBaseModel):
-    """Pydantic model for SQL table `CostVariable`."""
-    __table_name__: ClassVar[str] = 'CostVariable'
+    """Pydantic model for SQL table `cost_variable`."""
+    __table_name__: ClassVar[str] = 'cost_variable'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'period', 'tech', 'vintage', 'data_id')
     region: str = ...
     period: int = ...
@@ -255,8 +501,8 @@ class CostVariable(CanoeBaseModel):
 
 
 class Demand(CanoeBaseModel):
-    """Pydantic model for SQL table `Demand`."""
-    __table_name__: ClassVar[str] = 'Demand'
+    """Pydantic model for SQL table `demand`."""
+    __table_name__: ClassVar[str] = 'demand'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'period', 'commodity', 'data_id')
     region: str = ...
     period: int = ...
@@ -274,8 +520,8 @@ class Demand(CanoeBaseModel):
 
 
 class DemandSpecificDistribution(CanoeBaseModel):
-    """Pydantic model for SQL table `DemandSpecificDistribution`."""
-    __table_name__: ClassVar[str] = 'DemandSpecificDistribution'
+    """Pydantic model for SQL table `demand_specific_distribution`."""
+    __table_name__: ClassVar[str] = 'demand_specific_distribution'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'period', 'season', 'tod', 'demand_name', 'data_id')
     region: str = ...
     period: int = ...
@@ -294,8 +540,8 @@ class DemandSpecificDistribution(CanoeBaseModel):
 
 
 class EndOfLifeOutput(CanoeBaseModel):
-    """Pydantic model for SQL table `EndOfLifeOutput`."""
-    __table_name__: ClassVar[str] = 'EndOfLifeOutput'
+    """Pydantic model for SQL table `end_of_life_output`."""
+    __table_name__: ClassVar[str] = 'end_of_life_output'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'tech', 'vintage', 'output_comm', 'data_id')
     region: str = ...
     tech: str = ...
@@ -314,8 +560,8 @@ class EndOfLifeOutput(CanoeBaseModel):
 
 
 class Efficiency(CanoeBaseModel):
-    """Pydantic model for SQL table `Efficiency`."""
-    __table_name__: ClassVar[str] = 'Efficiency'
+    """Pydantic model for SQL table `efficiency`."""
+    __table_name__: ClassVar[str] = 'efficiency'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'input_comm', 'tech', 'vintage', 'output_comm', 'data_id')
     region: str = ...
     input_comm: str = ...
@@ -323,6 +569,7 @@ class Efficiency(CanoeBaseModel):
     vintage: int = ...
     output_comm: str = ...
     efficiency: float | None = Field(None, gt=0)
+    units: str | None = None
     notes: str | None = None
     data_source: str | None = None
     dq_cred: DataQualityCredibilityLevel | None = None
@@ -334,11 +581,14 @@ class Efficiency(CanoeBaseModel):
 
 
 class EfficiencyVariable(CanoeBaseModel):
-    """Pydantic model for SQL table `EfficiencyVariable`."""
-    __table_name__: ClassVar[str] = 'EfficiencyVariable'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'period', 'season', 'tod', 'input_comm', 'tech', 'vintage', 'output_comm', 'data_id')
+    """Pydantic model for SQL table `efficiency_variable`.
+
+    Note: `period` has been removed vs 3.2; efficiency is now
+    season-global rather than per-period.
+    """
+    __table_name__: ClassVar[str] = 'efficiency_variable'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'season', 'tod', 'input_comm', 'tech', 'vintage', 'output_comm', 'data_id')
     region: str = ...
-    period: int = ...
     season: str = ...
     tod: str = ...
     input_comm: str = ...
@@ -357,8 +607,8 @@ class EfficiencyVariable(CanoeBaseModel):
 
 
 class EmissionActivity(CanoeBaseModel):
-    """Pydantic model for SQL table `EmissionActivity`."""
-    __table_name__: ClassVar[str] = 'EmissionActivity'
+    """Pydantic model for SQL table `emission_activity`."""
+    __table_name__: ClassVar[str] = 'emission_activity'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'emis_comm', 'input_comm', 'tech', 'vintage', 'output_comm', 'data_id')
     region: str = ...
     emis_comm: str = ...
@@ -379,8 +629,8 @@ class EmissionActivity(CanoeBaseModel):
 
 
 class EmissionEmbodied(CanoeBaseModel):
-    """Pydantic model for SQL table `EmissionEmbodied`."""
-    __table_name__: ClassVar[str] = 'EmissionEmbodied'
+    """Pydantic model for SQL table `emission_embodied`."""
+    __table_name__: ClassVar[str] = 'emission_embodied'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'emis_comm', 'tech', 'vintage', 'data_id')
     region: str = ...
     emis_comm: str = ...
@@ -399,8 +649,8 @@ class EmissionEmbodied(CanoeBaseModel):
 
 
 class EmissionEndOfLife(CanoeBaseModel):
-    """Pydantic model for SQL table `EmissionEndOfLife`."""
-    __table_name__: ClassVar[str] = 'EmissionEndOfLife'
+    """Pydantic model for SQL table `emission_end_of_life`."""
+    __table_name__: ClassVar[str] = 'emission_end_of_life'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'emis_comm', 'tech', 'vintage', 'data_id')
     region: str = ...
     emis_comm: str = ...
@@ -419,8 +669,8 @@ class EmissionEndOfLife(CanoeBaseModel):
 
 
 class ExistingCapacity(CanoeBaseModel):
-    """Pydantic model for SQL table `ExistingCapacity`."""
-    __table_name__: ClassVar[str] = 'ExistingCapacity'
+    """Pydantic model for SQL table `existing_capacity`."""
+    __table_name__: ClassVar[str] = 'existing_capacity'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'tech', 'vintage', 'data_id')
     region: str = ...
     tech: str = ...
@@ -437,23 +687,15 @@ class ExistingCapacity(CanoeBaseModel):
     data_id: str = ...
 
 
-class TechGroup(CanoeBaseModel):
-    """Pydantic model for SQL table `TechGroup`."""
-    __table_name__: ClassVar[str] = 'TechGroup'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('group_name', 'data_id')
-    group_name: str = ...
-    notes: str | None = None
-    data_id: str = ...
-
-
 class LoanLifetimeProcess(CanoeBaseModel):
-    """Pydantic model for SQL table `LoanLifetimeProcess`."""
-    __table_name__: ClassVar[str] = 'LoanLifetimeProcess'
+    """Pydantic model for SQL table `loan_lifetime_process`."""
+    __table_name__: ClassVar[str] = 'loan_lifetime_process'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'tech', 'vintage', 'data_id')
     region: str = ...
     tech: str = ...
     vintage: int = ...
     lifetime: float | None = None
+    units: str | None = None
     notes: str | None = None
     data_source: str | None = None
     dq_cred: DataQualityCredibilityLevel | None = None
@@ -465,8 +707,8 @@ class LoanLifetimeProcess(CanoeBaseModel):
 
 
 class LoanRate(CanoeBaseModel):
-    """Pydantic model for SQL table `LoanRate`."""
-    __table_name__: ClassVar[str] = 'LoanRate'
+    """Pydantic model for SQL table `loan_rate`."""
+    __table_name__: ClassVar[str] = 'loan_rate'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'tech', 'vintage', 'data_id')
     region: str = ...
     tech: str = ...
@@ -483,13 +725,14 @@ class LoanRate(CanoeBaseModel):
 
 
 class LifetimeProcess(CanoeBaseModel):
-    """Pydantic model for SQL table `LifetimeProcess`."""
-    __table_name__: ClassVar[str] = 'LifetimeProcess'
+    """Pydantic model for SQL table `lifetime_process`."""
+    __table_name__: ClassVar[str] = 'lifetime_process'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'tech', 'vintage', 'data_id')
     region: str = ...
     tech: str = ...
     vintage: int = ...
     lifetime: float | None = None
+    units: str | None = None
     notes: str | None = None
     data_source: str | None = None
     dq_cred: DataQualityCredibilityLevel | None = None
@@ -501,12 +744,13 @@ class LifetimeProcess(CanoeBaseModel):
 
 
 class LifetimeTech(CanoeBaseModel):
-    """Pydantic model for SQL table `LifetimeTech`."""
-    __table_name__: ClassVar[str] = 'LifetimeTech'
+    """Pydantic model for SQL table `lifetime_tech`."""
+    __table_name__: ClassVar[str] = 'lifetime_tech'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'tech', 'data_id')
     region: str = ...
     tech: str = ...
     lifetime: float | None = None
+    units: str | None = None
     notes: str | None = None
     data_source: str | None = None
     dq_cred: DataQualityCredibilityLevel | None = None
@@ -517,17 +761,13 @@ class LifetimeTech(CanoeBaseModel):
     data_id: str = ...
 
 
-class Operator(CanoeBaseModel):
-    """Pydantic model for SQL table `Operator`."""
-    __table_name__: ClassVar[str] = 'Operator'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('operator',)
-    operator: OperatorCode = ...
-    notes: str | None = None
-
+# ===========================================================
+# Limit / constraint tables
+# ===========================================================
 
 class LimitGrowthCapacity(CanoeBaseModel):
-    """Pydantic model for SQL table `LimitGrowthCapacity`."""
-    __table_name__: ClassVar[str] = 'LimitGrowthCapacity'
+    """Pydantic model for SQL table `limit_growth_capacity`."""
+    __table_name__: ClassVar[str] = 'limit_growth_capacity'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'tech_or_group', 'operator', 'data_id')
     region: str = ...
     tech_or_group: str = ...
@@ -546,8 +786,8 @@ class LimitGrowthCapacity(CanoeBaseModel):
 
 
 class LimitDegrowthCapacity(CanoeBaseModel):
-    """Pydantic model for SQL table `LimitDegrowthCapacity`."""
-    __table_name__: ClassVar[str] = 'LimitDegrowthCapacity'
+    """Pydantic model for SQL table `limit_degrowth_capacity`."""
+    __table_name__: ClassVar[str] = 'limit_degrowth_capacity'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'tech_or_group', 'operator', 'data_id')
     region: str = ...
     tech_or_group: str = ...
@@ -566,8 +806,8 @@ class LimitDegrowthCapacity(CanoeBaseModel):
 
 
 class LimitGrowthNewCapacity(CanoeBaseModel):
-    """Pydantic model for SQL table `LimitGrowthNewCapacity`."""
-    __table_name__: ClassVar[str] = 'LimitGrowthNewCapacity'
+    """Pydantic model for SQL table `limit_growth_new_capacity`."""
+    __table_name__: ClassVar[str] = 'limit_growth_new_capacity'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'tech_or_group', 'operator', 'data_id')
     region: str = ...
     tech_or_group: str = ...
@@ -586,8 +826,8 @@ class LimitGrowthNewCapacity(CanoeBaseModel):
 
 
 class LimitDegrowthNewCapacity(CanoeBaseModel):
-    """Pydantic model for SQL table `LimitDegrowthNewCapacity`."""
-    __table_name__: ClassVar[str] = 'LimitDegrowthNewCapacity'
+    """Pydantic model for SQL table `limit_degrowth_new_capacity`."""
+    __table_name__: ClassVar[str] = 'limit_degrowth_new_capacity'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'tech_or_group', 'operator', 'data_id')
     region: str = ...
     tech_or_group: str = ...
@@ -606,8 +846,8 @@ class LimitDegrowthNewCapacity(CanoeBaseModel):
 
 
 class LimitGrowthNewCapacityDelta(CanoeBaseModel):
-    """Pydantic model for SQL table `LimitGrowthNewCapacityDelta`."""
-    __table_name__: ClassVar[str] = 'LimitGrowthNewCapacityDelta'
+    """Pydantic model for SQL table `limit_growth_new_capacity_delta`."""
+    __table_name__: ClassVar[str] = 'limit_growth_new_capacity_delta'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'tech_or_group', 'operator', 'data_id')
     region: str = ...
     tech_or_group: str = ...
@@ -626,8 +866,8 @@ class LimitGrowthNewCapacityDelta(CanoeBaseModel):
 
 
 class LimitDegrowthNewCapacityDelta(CanoeBaseModel):
-    """Pydantic model for SQL table `LimitDegrowthNewCapacityDelta`."""
-    __table_name__: ClassVar[str] = 'LimitDegrowthNewCapacityDelta'
+    """Pydantic model for SQL table `limit_degrowth_new_capacity_delta`."""
+    __table_name__: ClassVar[str] = 'limit_degrowth_new_capacity_delta'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'tech_or_group', 'operator', 'data_id')
     region: str = ...
     tech_or_group: str = ...
@@ -646,17 +886,18 @@ class LimitDegrowthNewCapacityDelta(CanoeBaseModel):
 
 
 class LimitStorageLevelFraction(CanoeBaseModel):
-    """Pydantic model for SQL table `LimitStorageLevelFraction`."""
-    __table_name__: ClassVar[str] = 'LimitStorageLevelFraction'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'period', 'season', 'tod', 'tech', 'vintage', 'operator', 'data_id')
+    """Pydantic model for SQL table `limit_storage_level_fraction`.
+
+    Note: `period` and `vintage` have been removed vs 3.2.
+    """
+    __table_name__: ClassVar[str] = 'limit_storage_level_fraction'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'season', 'tod', 'tech', 'operator', 'data_id')
     region: str = ...
-    period: int = ...
     season: str = ...
     tod: str = ...
     tech: str = ...
-    vintage: int = ...
     operator: OperatorCode = OperatorCode.LE
-    fraction: float | None = None
+    fraction: float | None = Field(None, ge=0, le=1)
     notes: str | None = None
     data_source: str | None = None
     dq_cred: DataQualityCredibilityLevel | None = None
@@ -668,8 +909,8 @@ class LimitStorageLevelFraction(CanoeBaseModel):
 
 
 class LimitActivity(CanoeBaseModel):
-    """Pydantic model for SQL table `LimitActivity`."""
-    __table_name__: ClassVar[str] = 'LimitActivity'
+    """Pydantic model for SQL table `limit_activity`."""
+    __table_name__: ClassVar[str] = 'limit_activity'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'period', 'tech_or_group', 'operator', 'data_id')
     region: str = ...
     period: int = ...
@@ -688,8 +929,8 @@ class LimitActivity(CanoeBaseModel):
 
 
 class LimitActivityShare(CanoeBaseModel):
-    """Pydantic model for SQL table `LimitActivityShare`."""
-    __table_name__: ClassVar[str] = 'LimitActivityShare'
+    """Pydantic model for SQL table `limit_activity_share`."""
+    __table_name__: ClassVar[str] = 'limit_activity_share'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'period', 'sub_group', 'super_group', 'operator', 'data_id')
     region: str = ...
     period: int = ...
@@ -708,11 +949,14 @@ class LimitActivityShare(CanoeBaseModel):
 
 
 class LimitAnnualCapacityFactor(CanoeBaseModel):
-    """Pydantic model for SQL table `LimitAnnualCapacityFactor`."""
-    __table_name__: ClassVar[str] = 'LimitAnnualCapacityFactor'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'tech', 'vintage', 'output_comm', 'operator', 'data_id')
+    """Pydantic model for SQL table `limit_annual_capacity_factor`.
+
+    Note: `tech` has been widened to `tech_or_group` vs 3.2.
+    """
+    __table_name__: ClassVar[str] = 'limit_annual_capacity_factor'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'tech_or_group', 'vintage', 'output_comm', 'operator', 'data_id')
     region: str = ...
-    tech: str = ...
+    tech_or_group: str = ...
     vintage: int = ...
     output_comm: str = ...
     operator: OperatorCode = OperatorCode.LE
@@ -728,8 +972,8 @@ class LimitAnnualCapacityFactor(CanoeBaseModel):
 
 
 class LimitCapacity(CanoeBaseModel):
-    """Pydantic model for SQL table `LimitCapacity`."""
-    __table_name__: ClassVar[str] = 'LimitCapacity'
+    """Pydantic model for SQL table `limit_capacity`."""
+    __table_name__: ClassVar[str] = 'limit_capacity'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'period', 'tech_or_group', 'operator', 'data_id')
     region: str = ...
     period: int = ...
@@ -748,8 +992,8 @@ class LimitCapacity(CanoeBaseModel):
 
 
 class LimitCapacityShare(CanoeBaseModel):
-    """Pydantic model for SQL table `LimitCapacityShare`."""
-    __table_name__: ClassVar[str] = 'LimitCapacityShare'
+    """Pydantic model for SQL table `limit_capacity_share`."""
+    __table_name__: ClassVar[str] = 'limit_capacity_share'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'period', 'sub_group', 'super_group', 'operator', 'data_id')
     region: str = ...
     period: int = ...
@@ -768,12 +1012,16 @@ class LimitCapacityShare(CanoeBaseModel):
 
 
 class LimitNewCapacity(CanoeBaseModel):
-    """Pydantic model for SQL table `LimitNewCapacity`."""
-    __table_name__: ClassVar[str] = 'LimitNewCapacity'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'period', 'tech_or_group', 'operator', 'data_id')
+    """Pydantic model for SQL table `limit_new_capacity`.
+
+    Note: `period` has been replaced by `vintage` vs 3.2. The constraint
+    now applies per vintage rather than per model period.
+    """
+    __table_name__: ClassVar[str] = 'limit_new_capacity'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'tech_or_group', 'vintage', 'operator', 'data_id')
     region: str = ...
-    period: int = ...
     tech_or_group: str = ...
+    vintage: int = ...
     operator: OperatorCode = OperatorCode.LE
     new_cap: float | None = None
     units: str | None = None
@@ -788,13 +1036,16 @@ class LimitNewCapacity(CanoeBaseModel):
 
 
 class LimitNewCapacityShare(CanoeBaseModel):
-    """Pydantic model for SQL table `LimitNewCapacityShare`."""
-    __table_name__: ClassVar[str] = 'LimitNewCapacityShare'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'period', 'sub_group', 'super_group', 'operator', 'data_id')
+    """Pydantic model for SQL table `limit_new_capacity_share`.
+
+    Note: `period` has been replaced by `vintage` vs 3.2.
+    """
+    __table_name__: ClassVar[str] = 'limit_new_capacity_share'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'sub_group', 'super_group', 'vintage', 'operator', 'data_id')
     region: str = ...
-    period: int = ...
     sub_group: str = ...
     super_group: str = ...
+    vintage: int = ...
     operator: OperatorCode = OperatorCode.LE
     share: float | None = None
     notes: str | None = None
@@ -808,8 +1059,8 @@ class LimitNewCapacityShare(CanoeBaseModel):
 
 
 class LimitResource(CanoeBaseModel):
-    """Pydantic model for SQL table `LimitResource`."""
-    __table_name__: ClassVar[str] = 'LimitResource'
+    """Pydantic model for SQL table `limit_resource`."""
+    __table_name__: ClassVar[str] = 'limit_resource'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'tech_or_group', 'operator', 'data_id')
     region: str = ...
     tech_or_group: str = ...
@@ -827,13 +1078,15 @@ class LimitResource(CanoeBaseModel):
 
 
 class LimitSeasonalCapacityFactor(CanoeBaseModel):
-    """Pydantic model for SQL table `LimitSeasonalCapacityFactor`."""
-    __table_name__: ClassVar[str] = 'LimitSeasonalCapacityFactor'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'period', 'season', 'tech', 'operator', 'data_id')
+    """Pydantic model for SQL table `limit_seasonal_capacity_factor`.
+
+    Note: `period` has been removed and `tech` widened to `tech_or_group` vs 3.2.
+    """
+    __table_name__: ClassVar[str] = 'limit_seasonal_capacity_factor'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'season', 'tech_or_group', 'operator', 'data_id')
     region: str = ...
-    period: int = ...
     season: str = ...
-    tech: str = ...
+    tech_or_group: str = ...
     operator: OperatorCode = OperatorCode.LE
     factor: float | None = None
     notes: str | None = None
@@ -847,8 +1100,8 @@ class LimitSeasonalCapacityFactor(CanoeBaseModel):
 
 
 class LimitTechInputSplit(CanoeBaseModel):
-    """Pydantic model for SQL table `LimitTechInputSplit`."""
-    __table_name__: ClassVar[str] = 'LimitTechInputSplit'
+    """Pydantic model for SQL table `limit_tech_input_split`."""
+    __table_name__: ClassVar[str] = 'limit_tech_input_split'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'period', 'input_comm', 'tech', 'operator', 'data_id')
     region: str = ...
     period: int = ...
@@ -867,8 +1120,8 @@ class LimitTechInputSplit(CanoeBaseModel):
 
 
 class LimitTechInputSplitAnnual(CanoeBaseModel):
-    """Pydantic model for SQL table `LimitTechInputSplitAnnual`."""
-    __table_name__: ClassVar[str] = 'LimitTechInputSplitAnnual'
+    """Pydantic model for SQL table `limit_tech_input_split_annual`."""
+    __table_name__: ClassVar[str] = 'limit_tech_input_split_annual'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'period', 'input_comm', 'tech', 'operator', 'data_id')
     region: str = ...
     period: int = ...
@@ -887,8 +1140,8 @@ class LimitTechInputSplitAnnual(CanoeBaseModel):
 
 
 class LimitTechOutputSplit(CanoeBaseModel):
-    """Pydantic model for SQL table `LimitTechOutputSplit`."""
-    __table_name__: ClassVar[str] = 'LimitTechOutputSplit'
+    """Pydantic model for SQL table `limit_tech_output_split`."""
+    __table_name__: ClassVar[str] = 'limit_tech_output_split'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'period', 'tech', 'output_comm', 'operator', 'data_id')
     region: str = ...
     period: int = ...
@@ -907,8 +1160,8 @@ class LimitTechOutputSplit(CanoeBaseModel):
 
 
 class LimitTechOutputSplitAnnual(CanoeBaseModel):
-    """Pydantic model for SQL table `LimitTechOutputSplitAnnual`."""
-    __table_name__: ClassVar[str] = 'LimitTechOutputSplitAnnual'
+    """Pydantic model for SQL table `limit_tech_output_split_annual`."""
+    __table_name__: ClassVar[str] = 'limit_tech_output_split_annual'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'period', 'tech', 'output_comm', 'operator', 'data_id')
     region: str = ...
     period: int = ...
@@ -927,8 +1180,8 @@ class LimitTechOutputSplitAnnual(CanoeBaseModel):
 
 
 class LimitEmission(CanoeBaseModel):
-    """Pydantic model for SQL table `LimitEmission`."""
-    __table_name__: ClassVar[str] = 'LimitEmission'
+    """Pydantic model for SQL table `limit_emission`."""
+    __table_name__: ClassVar[str] = 'limit_emission'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'period', 'emis_comm', 'operator', 'data_id')
     region: str = ...
     period: int = ...
@@ -947,20 +1200,21 @@ class LimitEmission(CanoeBaseModel):
 
 
 class LinkedTech(CanoeBaseModel):
-    """Pydantic model for SQL table `LinkedTech`."""
-    __table_name__: ClassVar[str] = 'LinkedTech'
+    """Pydantic model for SQL table `linked_tech`."""
+    __table_name__: ClassVar[str] = 'linked_tech'
     __primary_key__: ClassVar[tuple[str, ...]] = ('primary_region', 'primary_tech', 'emis_comm', 'data_id')
     primary_region: str = ...
     primary_tech: str = ...
     emis_comm: str = ...
     driven_tech: str | None = None
     notes: str | None = None
+    data_source: str | None = None
     data_id: str = ...
 
 
 class PlanningReserveMargin(CanoeBaseModel):
-    """Pydantic model for SQL table `PlanningReserveMargin`."""
-    __table_name__: ClassVar[str] = 'PlanningReserveMargin'
+    """Pydantic model for SQL table `planning_reserve_margin`."""
+    __table_name__: ClassVar[str] = 'planning_reserve_margin'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'data_id')
     region: str = ...
     margin: float | None = None
@@ -975,8 +1229,8 @@ class PlanningReserveMargin(CanoeBaseModel):
 
 
 class RampDownHourly(CanoeBaseModel):
-    """Pydantic model for SQL table `RampDownHourly`."""
-    __table_name__: ClassVar[str] = 'RampDownHourly'
+    """Pydantic model for SQL table `ramp_down_hourly`."""
+    __table_name__: ClassVar[str] = 'ramp_down_hourly'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'tech', 'data_id')
     region: str = ...
     tech: str = ...
@@ -992,8 +1246,8 @@ class RampDownHourly(CanoeBaseModel):
 
 
 class RampUpHourly(CanoeBaseModel):
-    """Pydantic model for SQL table `RampUpHourly`."""
-    __table_name__: ClassVar[str] = 'RampUpHourly'
+    """Pydantic model for SQL table `ramp_up_hourly`."""
+    __table_name__: ClassVar[str] = 'ramp_up_hourly'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'tech', 'data_id')
     region: str = ...
     tech: str = ...
@@ -1008,20 +1262,14 @@ class RampUpHourly(CanoeBaseModel):
     data_id: str = ...
 
 
-class Region(CanoeBaseModel):
-    """Pydantic model for SQL table `Region`."""
-    __table_name__: ClassVar[str] = 'Region'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('region',)
-    region: str = ...
-    notes: str | None = None
-
-
 class ReserveCapacityDerate(CanoeBaseModel):
-    """Pydantic model for SQL table `ReserveCapacityDerate`."""
-    __table_name__: ClassVar[str] = 'ReserveCapacityDerate'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'period', 'season', 'tech', 'vintage', 'data_id')
+    """Pydantic model for SQL table `reserve_capacity_derate`.
+
+    Note: `period` has been removed vs 3.2.
+    """
+    __table_name__: ClassVar[str] = 'reserve_capacity_derate'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'season', 'tech', 'vintage', 'data_id')
     region: str = ...
-    period: int = ...
     season: str = ...
     tech: str = ...
     vintage: int = ...
@@ -1036,20 +1284,9 @@ class ReserveCapacityDerate(CanoeBaseModel):
     data_id: str = ...
 
 
-class TimeSegmentFraction(CanoeBaseModel):
-    """Pydantic model for SQL table `TimeSegmentFraction`."""
-    __table_name__: ClassVar[str] = 'TimeSegmentFraction'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('period', 'season', 'tod')
-    period: int = ...
-    season: str = ...
-    tod: str = ...
-    segfrac: float | None = Field(None, ge=0, le=1)
-    notes: str | None = None
-
-
 class StorageDuration(CanoeBaseModel):
-    """Pydantic model for SQL table `StorageDuration`."""
-    __table_name__: ClassVar[str] = 'StorageDuration'
+    """Pydantic model for SQL table `storage_duration`."""
+    __table_name__: ClassVar[str] = 'storage_duration'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'tech', 'data_id')
     region: str = ...
     tech: str = ...
@@ -1065,8 +1302,8 @@ class StorageDuration(CanoeBaseModel):
 
 
 class LifetimeSurvivalCurve(CanoeBaseModel):
-    """Pydantic model for SQL table `LifetimeSurvivalCurve`."""
-    __table_name__: ClassVar[str] = 'LifetimeSurvivalCurve'
+    """Pydantic model for SQL table `lifetime_survival_curve`."""
+    __table_name__: ClassVar[str] = 'lifetime_survival_curve'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'period', 'tech', 'vintage', 'data_id')
     region: str = ...
     period: int = ...
@@ -1083,69 +1320,20 @@ class LifetimeSurvivalCurve(CanoeBaseModel):
     data_id: str = ...
 
 
-class TechnologyType(CanoeBaseModel):
-    """Pydantic model for SQL table `TechnologyType`."""
-    __table_name__: ClassVar[str] = 'TechnologyType'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('label',)
-    label: str = ...
-    description: str | None = None
-
-
-class TimeOfDay(CanoeBaseModel):
-    """Pydantic model for SQL table `TimeOfDay`."""
-    __table_name__: ClassVar[str] = 'TimeOfDay'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('tod',)
-    sequence: int | None = None
-    tod: str = ...
-
-
-class TimePeriod(CanoeBaseModel):
-    """Pydantic model for SQL table `TimePeriod`."""
-    __table_name__: ClassVar[str] = 'TimePeriod'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('period',)
-    sequence: int | None = None
-    period: int = ...
-    flag: TimePeriodTypeCode | None = None
-
-
-class TimeSeason(CanoeBaseModel):
-    """Pydantic model for SQL table `TimeSeason`."""
-    __table_name__: ClassVar[str] = 'TimeSeason'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('period', 'sequence', 'season')
-    period: int = ...
-    sequence: int = ...
-    season: str = ...
-    notes: str | None = None
-
-
-class TimeSeasonSequential(CanoeBaseModel):
-    """Pydantic model for SQL table `TimeSeasonSequential`."""
-    __table_name__: ClassVar[str] = 'TimeSeasonSequential'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('period', 'sequence', 'seas_seq', 'season')
-    period: int = ...
-    sequence: int = ...
-    seas_seq: str = ...
-    season: str = ...
-    num_days: float = Field(..., gt=0)
-    notes: str | None = None
-
-
-class TimePeriodType(CanoeBaseModel):
-    """Pydantic model for SQL table `TimePeriodType`."""
-    __table_name__: ClassVar[str] = 'TimePeriodType'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('label',)
-    label: str = ...
-    description: str | None = None
-
-
 class RPSRequirement(CanoeBaseModel):
-    """Pydantic model for SQL table `RPSRequirement`."""
-    __table_name__: ClassVar[str] = 'RPSRequirement'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'data_id')
+    """Pydantic model for SQL table `rps_requirement`.
+
+    Note: PK expanded vs 3.2 from (region, data_id) to
+    (region, period, tech_group, data_id), allowing multiple RPS entries
+    per region per dataset.
+    """
+    __table_name__: ClassVar[str] = 'rps_requirement'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'period', 'tech_group', 'data_id')
     region: str = ...
     period: int = ...
     tech_group: str = ...
     requirement: float = ...
+    notes: str | None = None
     data_source: str | None = None
     dq_cred: DataQualityCredibilityLevel | None = None
     dq_geog: DataQualityGeographyLevel | None = None
@@ -1153,124 +1341,15 @@ class RPSRequirement(CanoeBaseModel):
     dq_tech: DataQualityTechnologyLevel | None = None
     dq_time: DataQualityTimeLevel | None = None
     data_id: str = ...
-    notes: str | None = None
 
 
-class TechGroupMember(CanoeBaseModel):
-    """Pydantic model for SQL table `TechGroupMember`."""
-    __table_name__: ClassVar[str] = 'TechGroupMember'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('group_name', 'tech', 'data_id')
-    group_name: str = ...
-    tech: str = ...
-    data_id: str = ...
-
-
-class TechnologyLabel(CanoeBaseModel):
-    """Pydantic model for SQL table `TechnologyLabel`."""
-    __table_name__: ClassVar[str] = 'TechnologyLabel'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('tech',)
-    tech: str = ...
-    notes: str | None = None
-
-
-class Technology(CanoeBaseModel):
-    """Pydantic model for SQL table `Technology`."""
-    __table_name__: ClassVar[str] = 'Technology'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('tech', 'data_id')
-    tech: str = ...
-    flag: TechnologyTypeCode = ...
-    sector: str | None = None
-    category: str | None = None
-    sub_category: str | None = None
-    unlim_cap: int = 0
-    annual: int = 0
-    reserve: int = 0
-    curtail: int = 0
-    retire: int = 0
-    flex: int = 0
-    exchange: int = 0
-    seas_stor: int = 0
-    description: str | None = None
-    data_id: str = ...
-
-
-class DataSourceLabel(CanoeBaseModel):
-    """Pydantic model for SQL table `DataSourceLabel`."""
-    __table_name__: ClassVar[str] = 'DataSourceLabel'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('source_id',)
-    source_id: str = ...
-    notes: str | None = None
-
-
-class DataSource(CanoeBaseModel):
-    """Pydantic model for SQL table `DataSource`."""
-    __table_name__: ClassVar[str] = 'DataSource'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('source_id', 'data_id')
-    source_id: str = ...
-    source: str | None = None
-    notes: str | None = None
-    data_id: str = ...
-
-
-class DataQualityCredibility(CanoeBaseModel):
-    """Pydantic model for SQL table `DataQualityCredibility`."""
-    __table_name__: ClassVar[str] = 'DataQualityCredibility'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('dq_cred',)
-    dq_cred: DataQualityCredibilityLevel = ...
-    description: str | None = None
-
-
-class DataQualityGeography(CanoeBaseModel):
-    """Pydantic model for SQL table `DataQualityGeography`."""
-    __table_name__: ClassVar[str] = 'DataQualityGeography'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('dq_geog',)
-    dq_geog: DataQualityGeographyLevel = ...
-    description: str | None = None
-
-
-class DataQualityStructure(CanoeBaseModel):
-    """Pydantic model for SQL table `DataQualityStructure`."""
-    __table_name__: ClassVar[str] = 'DataQualityStructure'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('dq_struc',)
-    dq_struc: DataQualityStructureLevel = ...
-    description: str | None = None
-
-
-class DataQualityTechnology(CanoeBaseModel):
-    """Pydantic model for SQL table `DataQualityTechnology`."""
-    __table_name__: ClassVar[str] = 'DataQualityTechnology'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('dq_tech',)
-    dq_tech: DataQualityTechnologyLevel = ...
-    description: str | None = None
-
-
-class DataQualityTime(CanoeBaseModel):
-    """Pydantic model for SQL table `DataQualityTime`."""
-    __table_name__: ClassVar[str] = 'DataQualityTime'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('dq_time',)
-    dq_time: DataQualityTimeLevel = ...
-    description: str | None = None
-
-
-class DataSet(CanoeBaseModel):
-    """Pydantic model for SQL table `DataSet`."""
-    __table_name__: ClassVar[str] = 'DataSet'
-    __primary_key__: ClassVar[tuple[str, ...]] = ('data_id',)
-    data_id: str = ...
-    label: str | None = None
-    version: str | None = None
-    description: str | None = None
-    status: str | None = None
-    author: str | None = None
-    date: str | None = None
-    parent_id: str | None = None
-    changelog: str | None = None
-    notes: str | None = None
-
+# ===========================================================
+# Output tables (solver results)
+# ===========================================================
 
 class OutputDualVariable(CanoeBaseModel):
-    """Pydantic model for SQL table `OutputDualVariable`."""
-    __table_name__: ClassVar[str] = 'OutputDualVariable'
+    """Pydantic model for SQL table `output_dual_variable`."""
+    __table_name__: ClassVar[str] = 'output_dual_variable'
     __primary_key__: ClassVar[tuple[str, ...]] = ('constraint_name', 'scenario')
     scenario: str = ...
     constraint_name: str = ...
@@ -1278,12 +1357,12 @@ class OutputDualVariable(CanoeBaseModel):
 
 
 class OutputObjective(CanoeBaseModel):
-    """Pydantic model for SQL table `OutputObjective`.
+    """Pydantic model for SQL table `output_objective`.
 
     Note: SQL declares no PRIMARY KEY for this table; `scenario` is used
     here as the natural key (one objective value per scenario).
     """
-    __table_name__: ClassVar[str] = 'OutputObjective'
+    __table_name__: ClassVar[str] = 'output_objective'
     __primary_key__: ClassVar[tuple[str, ...]] = ('scenario',)
     scenario: str = ...
     objective_name: str | None = None
@@ -1291,8 +1370,8 @@ class OutputObjective(CanoeBaseModel):
 
 
 class OutputCurtailment(CanoeBaseModel):
-    """Pydantic model for SQL table `OutputCurtailment`."""
-    __table_name__: ClassVar[str] = 'OutputCurtailment'
+    """Pydantic model for SQL table `output_curtailment`."""
+    __table_name__: ClassVar[str] = 'output_curtailment'
     __primary_key__: ClassVar[tuple[str, ...]] = (
         'region', 'scenario', 'period', 'season', 'tod',
         'input_comm', 'tech', 'vintage', 'output_comm',
@@ -1312,8 +1391,8 @@ class OutputCurtailment(CanoeBaseModel):
 
 
 class OutputNetCapacity(CanoeBaseModel):
-    """Pydantic model for SQL table `OutputNetCapacity`."""
-    __table_name__: ClassVar[str] = 'OutputNetCapacity'
+    """Pydantic model for SQL table `output_net_capacity`."""
+    __table_name__: ClassVar[str] = 'output_net_capacity'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'scenario', 'period', 'tech', 'vintage')
     scenario: str = ...
     region: str = ...
@@ -1326,8 +1405,8 @@ class OutputNetCapacity(CanoeBaseModel):
 
 
 class OutputBuiltCapacity(CanoeBaseModel):
-    """Pydantic model for SQL table `OutputBuiltCapacity`."""
-    __table_name__: ClassVar[str] = 'OutputBuiltCapacity'
+    """Pydantic model for SQL table `output_built_capacity`."""
+    __table_name__: ClassVar[str] = 'output_built_capacity'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'scenario', 'tech', 'vintage')
     scenario: str = ...
     region: str = ...
@@ -1339,8 +1418,8 @@ class OutputBuiltCapacity(CanoeBaseModel):
 
 
 class OutputRetiredCapacity(CanoeBaseModel):
-    """Pydantic model for SQL table `OutputRetiredCapacity`."""
-    __table_name__: ClassVar[str] = 'OutputRetiredCapacity'
+    """Pydantic model for SQL table `output_retired_capacity`."""
+    __table_name__: ClassVar[str] = 'output_retired_capacity'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'scenario', 'period', 'tech', 'vintage')
     scenario: str = ...
     region: str = ...
@@ -1354,8 +1433,8 @@ class OutputRetiredCapacity(CanoeBaseModel):
 
 
 class OutputFlowIn(CanoeBaseModel):
-    """Pydantic model for SQL table `OutputFlowIn`."""
-    __table_name__: ClassVar[str] = 'OutputFlowIn'
+    """Pydantic model for SQL table `output_flow_in`."""
+    __table_name__: ClassVar[str] = 'output_flow_in'
     __primary_key__: ClassVar[tuple[str, ...]] = (
         'region', 'scenario', 'period', 'season', 'tod',
         'input_comm', 'tech', 'vintage', 'output_comm',
@@ -1375,8 +1454,8 @@ class OutputFlowIn(CanoeBaseModel):
 
 
 class OutputFlowOut(CanoeBaseModel):
-    """Pydantic model for SQL table `OutputFlowOut`."""
-    __table_name__: ClassVar[str] = 'OutputFlowOut'
+    """Pydantic model for SQL table `output_flow_out`."""
+    __table_name__: ClassVar[str] = 'output_flow_out'
     __primary_key__: ClassVar[tuple[str, ...]] = (
         'region', 'scenario', 'period', 'season', 'tod',
         'input_comm', 'tech', 'vintage', 'output_comm',
@@ -1396,8 +1475,8 @@ class OutputFlowOut(CanoeBaseModel):
 
 
 class OutputStorageLevel(CanoeBaseModel):
-    """Pydantic model for SQL table `OutputStorageLevel`."""
-    __table_name__: ClassVar[str] = 'OutputStorageLevel'
+    """Pydantic model for SQL table `output_storage_level`."""
+    __table_name__: ClassVar[str] = 'output_storage_level'
     __primary_key__: ClassVar[tuple[str, ...]] = ('scenario', 'region', 'period', 'season', 'tod', 'tech', 'vintage')
     scenario: str = ...
     region: str = ...
@@ -1412,8 +1491,8 @@ class OutputStorageLevel(CanoeBaseModel):
 
 
 class OutputEmission(CanoeBaseModel):
-    """Pydantic model for SQL table `OutputEmission`."""
-    __table_name__: ClassVar[str] = 'OutputEmission'
+    """Pydantic model for SQL table `output_emission`."""
+    __table_name__: ClassVar[str] = 'output_emission'
     __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'scenario', 'period', 'emis_comm', 'tech', 'vintage')
     scenario: str = ...
     region: str = ...
@@ -1427,8 +1506,8 @@ class OutputEmission(CanoeBaseModel):
 
 
 class OutputCost(CanoeBaseModel):
-    """Pydantic model for SQL table `OutputCost`."""
-    __table_name__: ClassVar[str] = 'OutputCost'
+    """Pydantic model for SQL table `output_cost`."""
+    __table_name__: ClassVar[str] = 'output_cost'
     __primary_key__: ClassVar[tuple[str, ...]] = ('scenario', 'region', 'period', 'tech', 'vintage')
     scenario: str = ...
     region: str = ...
@@ -1448,8 +1527,8 @@ class OutputCost(CanoeBaseModel):
 
 
 class OutputFlowOutSummary(CanoeBaseModel):
-    """Pydantic model for SQL table `OutputFlowOutSummary`."""
-    __table_name__: ClassVar[str] = 'OutputFlowOutSummary'
+    """Pydantic model for SQL table `output_flow_out_summary`."""
+    __table_name__: ClassVar[str] = 'output_flow_out_summary'
     __primary_key__: ClassVar[tuple[str, ...]] = ('scenario', 'region', 'period', 'input_comm', 'tech', 'vintage', 'output_comm')
     scenario: str = ...
     region: str = ...
@@ -1462,4 +1541,67 @@ class OutputFlowOutSummary(CanoeBaseModel):
     flow: float | None = None
 
 
-__all__ = ['CanoeBaseModel', 'MetaData', 'MetaDataReal', 'SeasonLabel', 'SectorLabel', 'CapacityCredit', 'CapacityFactorProcess', 'CapacityFactorTech', 'CapacityToActivity', 'CommodityLabel', 'Commodity', 'CommodityType', 'ConstructionInput', 'CostEmission', 'CostFixed', 'CostInvest', 'CostVariable', 'Demand', 'DemandSpecificDistribution', 'EndOfLifeOutput', 'Efficiency', 'EfficiencyVariable', 'EmissionActivity', 'EmissionEmbodied', 'EmissionEndOfLife', 'ExistingCapacity', 'TechGroup', 'LoanLifetimeProcess', 'LoanRate', 'LifetimeProcess', 'LifetimeTech', 'Operator', 'LimitGrowthCapacity', 'LimitDegrowthCapacity', 'LimitGrowthNewCapacity', 'LimitDegrowthNewCapacity', 'LimitGrowthNewCapacityDelta', 'LimitDegrowthNewCapacityDelta', 'LimitStorageLevelFraction', 'LimitActivity', 'LimitActivityShare', 'LimitAnnualCapacityFactor', 'LimitCapacity', 'LimitCapacityShare', 'LimitNewCapacity', 'LimitNewCapacityShare', 'LimitResource', 'LimitSeasonalCapacityFactor', 'LimitTechInputSplit', 'LimitTechInputSplitAnnual', 'LimitTechOutputSplit', 'LimitTechOutputSplitAnnual', 'LimitEmission', 'LinkedTech', 'PlanningReserveMargin', 'RampDownHourly', 'RampUpHourly', 'Region', 'ReserveCapacityDerate', 'TimeSegmentFraction', 'StorageDuration', 'LifetimeSurvivalCurve', 'TechnologyType', 'TimeOfDay', 'TimePeriod', 'TimeSeason', 'TimeSeasonSequential', 'TimePeriodType', 'RPSRequirement', 'TechGroupMember', 'TechnologyLabel', 'Technology', 'DataSourceLabel', 'DataSource', 'DataQualityCredibility', 'DataQualityGeography', 'DataQualityStructure', 'DataQualityTechnology', 'DataQualityTime', 'DataSet', 'OutputDualVariable', 'OutputObjective', 'OutputCurtailment', 'OutputNetCapacity', 'OutputBuiltCapacity', 'OutputRetiredCapacity', 'OutputFlowIn', 'OutputFlowOut', 'OutputStorageLevel', 'OutputEmission', 'OutputCost', 'OutputFlowOutSummary']
+class MyopicEfficiency(CanoeBaseModel):
+    """Pydantic model for SQL table `myopic_efficiency`."""
+    __table_name__: ClassVar[str] = 'myopic_efficiency'
+    __primary_key__: ClassVar[tuple[str, ...]] = ('region', 'input_comm', 'tech', 'vintage', 'output_comm')
+    base_year: int | None = None
+    region: str = ...
+    input_comm: str = ...
+    tech: str = ...
+    vintage: int = ...
+    output_comm: str = ...
+    efficiency: float | None = None
+    lifetime: int | None = None
+
+
+__all__ = [
+    'Metadata', 'MetadataReal',
+    # Label / registry
+    'CommodityLabel', 'TechnologyLabel', 'TechGroupLabel', 'SectorLabel',
+    # Enum / type
+    'CommodityType', 'TechnologyType', 'TimePeriodType', 'Operator',
+    # Data quality & provenance
+    'DataQualityCredibility', 'DataQualityGeography', 'DataQualityStructure',
+    'DataQualityTechnology', 'DataQualityTime',
+    'DataSourceLabel', 'DataSet', 'DataSource',
+    # Time
+    'TimePeriod', 'TimeOfDay', 'TimeSeason', 'TimeSeasonSequential',
+    # Region
+    'Region',
+    # Core model
+    'Commodity', 'Technology', 'TechGroup', 'TechGroupMember',
+    # Data tables
+    'CapacityCredit', 'CapacityFactorProcess', 'CapacityFactorTech',
+    'CapacityToActivity', 'ConstructionInput',
+    'CostEmission', 'CostFixed', 'CostInvest', 'CostVariable',
+    'Demand', 'DemandSpecificDistribution',
+    'EndOfLifeOutput', 'Efficiency', 'EfficiencyVariable',
+    'EmissionActivity', 'EmissionEmbodied', 'EmissionEndOfLife',
+    'ExistingCapacity',
+    'LoanLifetimeProcess', 'LoanRate', 'LifetimeProcess', 'LifetimeTech',
+    'LifetimeSurvivalCurve',
+    # Limit / constraint tables
+    'LimitGrowthCapacity', 'LimitDegrowthCapacity',
+    'LimitGrowthNewCapacity', 'LimitDegrowthNewCapacity',
+    'LimitGrowthNewCapacityDelta', 'LimitDegrowthNewCapacityDelta',
+    'LimitStorageLevelFraction',
+    'LimitActivity', 'LimitActivityShare',
+    'LimitAnnualCapacityFactor',
+    'LimitCapacity', 'LimitCapacityShare',
+    'LimitNewCapacity', 'LimitNewCapacityShare',
+    'LimitResource', 'LimitSeasonalCapacityFactor',
+    'LimitTechInputSplit', 'LimitTechInputSplitAnnual',
+    'LimitTechOutputSplit', 'LimitTechOutputSplitAnnual',
+    'LimitEmission',
+    'LinkedTech', 'PlanningReserveMargin',
+    'RampDownHourly', 'RampUpHourly',
+    'ReserveCapacityDerate', 'StorageDuration',
+    'RPSRequirement',
+    # Output tables (solver results)
+    'OutputDualVariable', 'OutputObjective', 'OutputCurtailment',
+    'OutputNetCapacity', 'OutputBuiltCapacity', 'OutputRetiredCapacity',
+    'OutputFlowIn', 'OutputFlowOut', 'OutputFlowOutSummary',
+    'OutputStorageLevel', 'OutputEmission', 'OutputCost',
+    'MyopicEfficiency',
+]
