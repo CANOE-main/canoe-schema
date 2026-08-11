@@ -820,7 +820,7 @@ CREATE TABLE IF NOT EXISTS limit_growth_capacity
 (
     region        TEXT,
     tech_or_group TEXT,
-    operator      TEXT NOT NULL DEFAULT "le"
+    operator      TEXT NOT NULL DEFAULT 'le'
         REFERENCES operator (operator),
     rate          REAL NOT NULL DEFAULT 0,
     seed          REAL NOT NULL DEFAULT 0,
@@ -842,7 +842,7 @@ CREATE TABLE IF NOT EXISTS limit_degrowth_capacity
 (
     region        TEXT,
     tech_or_group TEXT,
-    operator      TEXT NOT NULL DEFAULT "le"
+    operator      TEXT NOT NULL DEFAULT 'le'
         REFERENCES operator (operator),
     rate          REAL NOT NULL DEFAULT 0,
     seed          REAL NOT NULL DEFAULT 0,
@@ -864,7 +864,7 @@ CREATE TABLE IF NOT EXISTS limit_growth_new_capacity
 (
     region        TEXT,
     tech_or_group TEXT,
-    operator      TEXT NOT NULL DEFAULT "le"
+    operator      TEXT NOT NULL DEFAULT 'le'
         REFERENCES operator (operator),
     rate          REAL NOT NULL DEFAULT 0,
     seed          REAL NOT NULL DEFAULT 0,
@@ -886,7 +886,7 @@ CREATE TABLE IF NOT EXISTS limit_degrowth_new_capacity
 (
     region        TEXT,
     tech_or_group TEXT,
-    operator      TEXT NOT NULL DEFAULT "le"
+    operator      TEXT NOT NULL DEFAULT 'le'
         REFERENCES operator (operator),
     rate          REAL NOT NULL DEFAULT 0,
     seed          REAL NOT NULL DEFAULT 0,
@@ -908,7 +908,7 @@ CREATE TABLE IF NOT EXISTS limit_growth_new_capacity_delta
 (
     region        TEXT,
     tech_or_group TEXT,
-    operator      TEXT NOT NULL DEFAULT "le"
+    operator      TEXT NOT NULL DEFAULT 'le'
         REFERENCES operator (operator),
     rate          REAL NOT NULL DEFAULT 0,
     seed          REAL NOT NULL DEFAULT 0,
@@ -930,7 +930,7 @@ CREATE TABLE IF NOT EXISTS limit_degrowth_new_capacity_delta
 (
     region        TEXT,
     tech_or_group TEXT,
-    operator      TEXT NOT NULL DEFAULT "le"
+    operator      TEXT NOT NULL DEFAULT 'le'
         REFERENCES operator (operator),
     rate          REAL NOT NULL DEFAULT 0,
     seed          REAL NOT NULL DEFAULT 0,
@@ -956,7 +956,7 @@ CREATE TABLE IF NOT EXISTS limit_storage_level_fraction
     tod         TEXT
         REFERENCES time_of_day (tod),
     tech        TEXT,
-    operator    TEXT NOT NULL DEFAULT "le"
+    operator    TEXT NOT NULL DEFAULT 'le'
         REFERENCES operator (operator),
     fraction    REAL,
     notes       TEXT,
@@ -980,7 +980,7 @@ CREATE TABLE IF NOT EXISTS limit_activity
     period        INTEGER
         REFERENCES time_period (period),
     tech_or_group TEXT,
-    operator      TEXT NOT NULL DEFAULT "le"
+    operator      TEXT NOT NULL DEFAULT 'le'
         REFERENCES operator (operator),
     activity      REAL,
     units         TEXT,
@@ -1004,7 +1004,7 @@ CREATE TABLE IF NOT EXISTS limit_activity_share
         REFERENCES time_period (period),
     sub_group   TEXT,
     super_group TEXT,
-    operator    TEXT NOT NULL DEFAULT "le"
+    operator    TEXT NOT NULL DEFAULT 'le'
         REFERENCES operator (operator),
     share       REAL,
     notes       TEXT,
@@ -1027,7 +1027,7 @@ CREATE TABLE IF NOT EXISTS limit_annual_capacity_factor
     vintage       INTEGER
         REFERENCES time_period (period),
     output_comm   TEXT,
-    operator      TEXT NOT NULL DEFAULT "le"
+    operator      TEXT NOT NULL DEFAULT 'le'
         REFERENCES operator (operator),
     factor        REAL,
     notes         TEXT,
@@ -1051,7 +1051,7 @@ CREATE TABLE IF NOT EXISTS limit_capacity
     period        INTEGER
         REFERENCES time_period (period),
     tech_or_group TEXT,
-    operator      TEXT NOT NULL DEFAULT "le"
+    operator      TEXT NOT NULL DEFAULT 'le'
         REFERENCES operator (operator),
     capacity      REAL,
     units         TEXT,
@@ -1075,7 +1075,7 @@ CREATE TABLE IF NOT EXISTS limit_capacity_share
         REFERENCES time_period (period),
     sub_group   TEXT,
     super_group TEXT,
-    operator    TEXT NOT NULL DEFAULT "le"
+    operator    TEXT NOT NULL DEFAULT 'le'
         REFERENCES operator (operator),
     share       REAL,
     notes       TEXT,
@@ -1097,7 +1097,7 @@ CREATE TABLE IF NOT EXISTS limit_new_capacity
     tech_or_group TEXT,
     vintage       INTEGER
         REFERENCES time_period (period),
-    operator      TEXT NOT NULL DEFAULT "le"
+    operator      TEXT NOT NULL DEFAULT 'le'
         REFERENCES operator (operator),
     new_cap       REAL,
     units         TEXT,
@@ -1121,7 +1121,7 @@ CREATE TABLE IF NOT EXISTS limit_new_capacity_share
     super_group TEXT,
     vintage     INTEGER
         REFERENCES time_period (period),
-    operator    TEXT NOT NULL DEFAULT "le"
+    operator    TEXT NOT NULL DEFAULT 'le'
         REFERENCES operator (operator),
     share       REAL,
     notes       TEXT,
@@ -1141,7 +1141,7 @@ CREATE TABLE IF NOT EXISTS limit_resource
 (
     region        TEXT,
     tech_or_group TEXT,
-    operator      TEXT NOT NULL DEFAULT "le"
+    operator      TEXT NOT NULL DEFAULT 'le'
         REFERENCES operator (operator),
     cum_act       REAL,
     units         TEXT,
@@ -1165,7 +1165,7 @@ CREATE TABLE IF NOT EXISTS limit_seasonal_capacity_factor
     season        TEXT
         REFERENCES time_season (season),
     tech_or_group TEXT,
-    operator      TEXT NOT NULL DEFAULT "le"
+    operator      TEXT NOT NULL DEFAULT 'le'
         REFERENCES operator (operator),
     factor        REAL,
     notes         TEXT,
@@ -1188,7 +1188,7 @@ CREATE TABLE IF NOT EXISTS limit_tech_input_split
         REFERENCES time_period (period),
     input_comm  TEXT,
     tech        TEXT,
-    operator    TEXT NOT NULL DEFAULT "le"
+    operator    TEXT NOT NULL DEFAULT 'le'
         REFERENCES operator (operator),
     proportion  REAL,
     notes       TEXT,
@@ -1213,7 +1213,7 @@ CREATE TABLE IF NOT EXISTS limit_tech_input_split_annual
         REFERENCES time_period (period),
     input_comm  TEXT,
     tech        TEXT,
-    operator    TEXT NOT NULL DEFAULT "le"
+    operator    TEXT NOT NULL DEFAULT 'le'
         REFERENCES operator (operator),
     proportion  REAL,
     notes       TEXT,
@@ -1237,7 +1237,7 @@ CREATE TABLE IF NOT EXISTS limit_tech_output_split
         REFERENCES time_period (period),
     tech        TEXT,
     output_comm TEXT,
-    operator    TEXT NOT NULL DEFAULT "le"
+    operator    TEXT NOT NULL DEFAULT 'le'
         REFERENCES operator (operator),
     proportion  REAL,
     notes       TEXT,
@@ -1262,7 +1262,7 @@ CREATE TABLE IF NOT EXISTS limit_tech_output_split_annual
         REFERENCES time_period (period),
     tech        TEXT,
     output_comm TEXT,
-    operator    TEXT NOT NULL DEFAULT "le"
+    operator    TEXT NOT NULL DEFAULT 'le'
         REFERENCES operator (operator),
     proportion  REAL,
     notes       TEXT,
@@ -1286,7 +1286,7 @@ CREATE TABLE IF NOT EXISTS limit_emission
     period      INTEGER
         REFERENCES time_period (period),
     emis_comm   TEXT,
-    operator    TEXT NOT NULL DEFAULT "le"
+    operator    TEXT NOT NULL DEFAULT 'le'
         REFERENCES operator (operator),
     value       REAL,
     units       TEXT,
