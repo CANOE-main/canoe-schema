@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-LARGE_THRESHOLD = 100_000  # skip row diff for tables larger than this
+LARGE_THRESHOLD = 10_000_000  # skip row diff for tables larger than this
 AUTO_DETAIL_MAX = 20       # expand to full detail automatically when total diffs ≤ this
 DEFAULT_LIMIT = 30         # max differing rows shown per table in detail mode
 

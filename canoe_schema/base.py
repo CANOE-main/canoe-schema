@@ -202,6 +202,7 @@ class CanoeBaseModel(BaseModel):
             f"ON CONFLICT ({conflict_sql}) {conflict_action};"
         )
 
+    @staticmethod
     def bulk_replace_into_sql(
         rows: Sequence[CanoeBaseModel],
         *,
@@ -268,6 +269,7 @@ class CanoeBaseModel(BaseModel):
         return f"INSERT OR IGNORE INTO {table_sql} ({col_sql}) VALUES ({value_sql});"
 
 
+    @staticmethod
     def bulk_insert_or_ignore_sql(
         rows: Sequence[CanoeBaseModel],
         *,
