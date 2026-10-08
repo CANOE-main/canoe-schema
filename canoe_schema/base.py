@@ -5,6 +5,8 @@ from typing import Any, ClassVar, Sequence
 
 from pydantic import BaseModel, ConfigDict
 
+# Per-model result of CanoeBaseModel._sql_fields (None = must use model_dump).
+_SQL_FIELDS_CACHE: dict[type[CanoeBaseModel], list[tuple[str, str]] | None] = {}
 
 class CanoeBaseModel(BaseModel):
     """Common base model for all CANOE schema rows."""
@@ -60,6 +62,119 @@ class CanoeBaseModel(BaseModel):
             raise ValueError("No fields available to build SQL statement")
         return payload
 
+    @classmethod
+    def _sql_fields(cls) -> list[tuple[str, str]] | None:
+        """(attribute name, column name) pairs, in the order ``model_dump`` emits them.
+
+        Returns None when a full dump could produce different columns or values
+        (computed/excluded fields, custom serializers, extra fields), in which case
+        callers must fall back to ``_dump_for_sql``.
+        """
+        if cls in _SQL_FIELDS_CACHE:
+            return _SQL_FIELDS_CACHE[cls]
+
+        decorators = cls.__pydantic_decorators__
+        eligible = (
+            bool(cls.model_fields)
+            and not cls.model_computed_fields
+            and not decorators.field_serializers
+            and not decorators.model_serializers
+            and cls.model_config.get("extra") != "allow"
+            and not any(field.exclude for field in cls.model_fields.values())
+        )
+        fields = (
+            [
+                (name, field.serialization_alias or field.alias or name)
+                for name, field in cls.model_fields.items()
+            ]
+            if eligible
+            else None
+        )
+        _SQL_FIELDS_CACHE[cls] = fields
+        return fields
+
+    @classmethod
+    def _bulk_columns_and_params(
+        cls,
+        rows: Sequence[CanoeBaseModel],
+        *,
+        include_nulls: bool,
+        include_defaults: bool,
+    ) -> tuple[list[str], list[tuple[Any, ...]]]:
+        """Resolve the shared column list and coerced value tuples for a batch.
+
+        Callers are responsible for validating ``rows`` (non-empty, types).
+        Raises ValueError if rows would produce different columns.
+        """
+        coerce = cls._coerce_sql_value
+        row_type = type(rows[0])
+        fields = row_type._sql_fields()
+
+        # Fast path: every column is written, so read attributes instead of dumping.
+        if (
+            include_nulls
+            and include_defaults
+            and fields is not None
+            and all(type(row) is row_type for row in rows)
+        ):
+            names = [name for name, _ in fields]
+            params = [
+                tuple(coerce(getattr(row, name)) for name in names) for row in rows
+            ]
+            return [column for _, column in fields], params
+
+        columns: list[str] | None = None
+        params = []
+        for row in rows:
+            payload = row._dump_for_sql(
+                include_nulls=include_nulls,
+                include_defaults=include_defaults,
+            )
+            if columns is None:
+                columns = list(payload)
+            elif list(payload) != columns:
+                raise ValueError(
+                    "Rows produced different SQL columns. "
+                    "Use include_nulls/include_defaults consistently so all rows align."
+                )
+            params.append(tuple(coerce(value) for value in payload.values()))
+        assert columns is not None
+        return columns, params
+
+    @classmethod
+    def _bulk_sql(
+        cls,
+        verb: str,
+        rows: Sequence[CanoeBaseModel],
+        *,
+        include_nulls: bool,
+        include_defaults: bool,
+    ) -> tuple[str, list[tuple[Any, ...]]]:
+        """Build ``<verb> INTO <cls table> (...) VALUES (?, ...);`` and its params."""
+        columns, params = cls._bulk_columns_and_params(
+            rows,
+            include_nulls=include_nulls,
+            include_defaults=include_defaults,
+        )
+        table_sql = cls._quote_identifier(cls.table_name())
+        col_sql = ", ".join(cls._quote_identifier(col) for col in columns)
+        placeholders = ", ".join("?" for _ in columns)
+        sql = f"{verb} INTO {table_sql} ({col_sql}) VALUES ({placeholders});"
+        return sql, params
+
+    @staticmethod
+    def _check_same_row_type(rows: Sequence[CanoeBaseModel]) -> type[CanoeBaseModel]:
+        if not rows:
+            raise ValueError("rows must not be empty")
+
+        row_type = type(rows[0])
+        if not all(type(row) is row_type for row in rows):
+            raise TypeError(
+                f"All rows must be the same type, got: "
+                f"{', '.join(sorted({type(r).__name__ for r in rows}))}"
+            )
+        return row_type
+
     def to_insert_sql(
         self,
         *,
@@ -106,46 +221,31 @@ class CanoeBaseModel(BaseModel):
         if not rows:
             raise ValueError("rows cannot be empty")
 
-        first = rows[0]
+        # Subclass instances are accepted; the table is always cls's.
         if any(not isinstance(r, cls) for r in rows):
             raise TypeError(f"All rows must be instances of {cls.__name__}")
 
-        first_payload = first._dump_for_sql(
-            include_nulls=include_nulls,
-            include_defaults=include_defaults,
-        )
-        columns = list(first_payload.keys())
-
-        payloads: list[dict[str, Any]] = [first_payload]
-        for row in rows[1:]:
-            payload = row._dump_for_sql(
+        if parameterized:
+            return cls._bulk_sql(
+                "INSERT",
+                rows,
                 include_nulls=include_nulls,
                 include_defaults=include_defaults,
             )
-            if list(payload.keys()) != columns:
-                raise ValueError(
-                    "Rows produced different SQL columns. "
-                    "Use include_nulls/include_defaults consistently so all rows align."
-                )
-            payloads.append(payload)
 
+        columns, params = cls._bulk_columns_and_params(
+            rows,
+            include_nulls=include_nulls,
+            include_defaults=include_defaults,
+        )
         col_sql = ", ".join(cls._quote_identifier(col) for col in columns)
         table_sql = cls._quote_identifier(cls.table_name())
-
-        if parameterized:
-            placeholders = ", ".join("?" for _ in columns)
-            sql = f"INSERT INTO {table_sql} ({col_sql}) VALUES ({placeholders});"
-            params = [
-                tuple(cls._coerce_sql_value(payload[col]) for col in columns)
-                for payload in payloads
-            ]
-            return sql, params
-
-        statements = []
-        for payload in payloads:
-            value_sql = ", ".join(cls._sql_literal(payload[col]) for col in columns)
-            statements.append(f"INSERT INTO {table_sql} ({col_sql}) VALUES ({value_sql});")
-        return statements
+        # Values are already Enum-coerced; _sql_literal gives the same text either way.
+        return [
+            f"INSERT INTO {table_sql} ({col_sql}) VALUES "
+            f"({', '.join(cls._sql_literal(value) for value in values)});"
+            for values in params
+        ]
 
     def to_upsert_sql(
         self,
@@ -209,39 +309,17 @@ class CanoeBaseModel(BaseModel):
         include_nulls: bool = False,
         include_defaults: bool = True,
     ) -> tuple[str, list[tuple[Any, ...]]]:
-        """Build a REPLACE INTO ... SQL and parameter tuples for a batch of rows."""
-        if not rows:
-            raise ValueError("rows must not be empty")
+        """Build a REPLACE INTO ... SQL and parameter tuples for a batch of rows.
 
-        row_type = type(rows[0])
-        if not all(type(row) is row_type for row in rows):
-            raise TypeError(
-                f"All rows must be the same type, got: "
-                f"{', '.join(sorted({type(r).__name__ for r in rows}))}"
-            )
-
-        # Use the first row to build the SQL template
-        first = rows[0]
-        payload = first._dump_for_sql(
+        All rows must share the exact same type; the table is that type's.
+        """
+        row_type = CanoeBaseModel._check_same_row_type(rows)
+        return row_type._bulk_sql(
+            "REPLACE",
+            rows,
             include_nulls=include_nulls,
             include_defaults=include_defaults,
         )
-        columns = list(payload.keys())
-        table_sql = first._quote_identifier(first.table_name())
-        col_sql = ", ".join(first._quote_identifier(col) for col in columns)
-        placeholders = ", ".join("?" for _ in columns)
-
-        sql = f"REPLACE INTO {table_sql} ({col_sql}) VALUES ({placeholders});"
-
-        params = []
-        for row in rows:
-            row_payload = row._dump_for_sql(
-                include_nulls=include_nulls,
-                include_defaults=include_defaults,
-            )
-            params.append(tuple(row._coerce_sql_value(row_payload[col]) for col in columns))
-
-        return sql, params
     
     def to_insert_or_ignore_sql(
         self,
@@ -276,38 +354,17 @@ class CanoeBaseModel(BaseModel):
         include_nulls: bool = False,
         include_defaults: bool = True,
     ) -> tuple[str, list[tuple[Any, ...]]]:
-        """Build an INSERT OR IGNORE ... SQL and parameter tuples for a batch of rows."""
-        if not rows:
-            raise ValueError("rows must not be empty")
+        """Build an INSERT OR IGNORE ... SQL and parameter tuples for a batch of rows.
 
-        row_type = type(rows[0])
-        if not all(type(row) is row_type for row in rows):
-            raise TypeError(
-                f"All rows must be the same type, got: "
-                f"{', '.join(sorted({type(r).__name__ for r in rows}))}"
-            )
-
-        first = rows[0]
-        payload = first._dump_for_sql(
+        All rows must share the exact same type; the table is that type's.
+        """
+        row_type = CanoeBaseModel._check_same_row_type(rows)
+        return row_type._bulk_sql(
+            "INSERT OR IGNORE",
+            rows,
             include_nulls=include_nulls,
             include_defaults=include_defaults,
         )
-        columns = list(payload.keys())
-        table_sql = first._quote_identifier(first.table_name())
-        col_sql = ", ".join(first._quote_identifier(col) for col in columns)
-        placeholders = ", ".join("?" for _ in columns)
-
-        sql = f"INSERT OR IGNORE INTO {table_sql} ({col_sql}) VALUES ({placeholders});"
-
-        params = [
-            tuple(row._coerce_sql_value(row._dump_for_sql(
-                include_nulls=include_nulls,
-                include_defaults=include_defaults,
-            )[col]) for col in columns)
-            for row in rows
-        ]
-
-        return sql, params
     
     def to_replace_sql(
         self,
